@@ -14,7 +14,8 @@ function trackEvent(type: "pageview" | "productview", data?: { path?: string; pr
     if (data?.productId) payload.productId = data.productId;
     if (data?.category) payload.category = data.category;
     payload.path = payload.path || window.location.pathname;
-    navigator.sendBeacon("/api/analytics/track", JSON.stringify(payload));
+    const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    navigator.sendBeacon("/api/analytics/track", blob);
   } catch {}
 }
 

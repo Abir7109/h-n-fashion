@@ -127,13 +127,13 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
+        setLoading(false);
         fetchRecommendations().then(setRecommendedProducts);
         return;
       }
     } catch (err) {
       console.error("Communications error fetching products", err);
     }
-    // Fallback to local data when API fails
     setProducts(localProducts as Product[]);
     setLoading(false);
   };
