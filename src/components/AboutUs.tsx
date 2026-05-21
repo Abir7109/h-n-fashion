@@ -1,4 +1,4 @@
-import { ShieldCheck, Compass, Lock, User, PhoneCall, Mail, MapPin, Leaf, Target, Award, CheckCircle } from "lucide-react";
+import { ShieldCheck, Compass, Lock, PhoneCall, Mail, MapPin, Leaf, Target } from "lucide-react";
 
 const contactInfo = {
   phone: "+880 1603 521341",
@@ -124,8 +124,8 @@ export default function AboutUs({ onNavigate }: { onNavigate: (path: string) => 
             <h2 className="font-display font-black text-2xl sm:text-3xl text-[#0b1329] uppercase">Meet Our Leadership</h2>
           </div>
           <div className="max-w-md mx-auto bg-[#0b1329] rounded-2xl p-8 text-center border border-white/10 shadow-xl">
-            <div className="w-20 h-20 bg-[#feae2c]/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#feae2c]">
-              <User size={36} className="text-[#feae2c]" />
+            <div className="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-2 border-[#feae2c]">
+              <img src="/aboutus.jpeg" alt="Humayun Kabir" className="w-full h-full object-cover" />
             </div>
             <h3 className="font-display font-black text-xl text-white">Humayun Kabir</h3>
             <p className="text-[#feae2c] font-mono text-[10px] font-bold uppercase tracking-widest mb-4">Managing Director</p>
