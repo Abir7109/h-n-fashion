@@ -67,6 +67,7 @@ ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
 DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
+DROP POLICY IF EXISTS "Public can read inquiries" ON inquiries;
 
 -- Public can insert inquiries (contact form)
 CREATE POLICY "Public can insert inquiries"
@@ -74,10 +75,10 @@ CREATE POLICY "Public can insert inquiries"
   TO anon
   WITH CHECK (true);
 
--- Only authenticated admin can read inquiries
-CREATE POLICY "Admin can read inquiries"
+-- Public can read inquiries (for admin panel display)
+CREATE POLICY "Public can read inquiries"
   ON inquiries FOR SELECT
-  TO authenticated
+  TO anon
   USING (true);
 
 -- 3. ANALYTICS EVENTS TABLE

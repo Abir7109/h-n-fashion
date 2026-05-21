@@ -120,8 +120,9 @@ CREATE TABLE IF NOT EXISTS inquiries (
 ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
 DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
+DROP POLICY IF EXISTS "Public can read inquiries" ON inquiries;
 CREATE POLICY "Public can insert inquiries" ON inquiries FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Public can read inquiries" ON inquiries FOR SELECT TO anon USING (true);
 `;
 
   app.get("/api/migrate", async (_req, res) => {
