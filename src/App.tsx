@@ -748,20 +748,20 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-300 whitespace-nowrap">
             {/* Mode Tabs */}
             <span 
-              onClick={() => navigateTo("/stock-goods")}
-              className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
-                mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
-              }`}
-            >
-              Stock Goods
-            </span>
-            <span 
               onClick={() => navigateTo("/")}
               className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
                 mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
               }`}
             >
               Fresh Goods
+            </span>
+            <span 
+              onClick={() => navigateTo("/stock-goods")}
+              className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
+                mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
+              }`}
+            >
+              Stock Goods
             </span>
             <span className="text-slate-600 mx-1">|</span>
             <span 
@@ -811,20 +811,20 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             {/* Mode Tabs for mobile */}
             <div className="flex gap-2 pb-2 border-b border-white/5">
               <span 
-                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/stock-goods"); }}
-                className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
-                  mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
-                }`}
-              >
-                Stock Goods
-              </span>
-              <span 
                 onClick={() => { setIsMobileMenuOpen(false); navigateTo("/"); }}
                 className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
                 }`}
               >
                 Fresh Goods
+              </span>
+              <span 
+                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/stock-goods"); }}
+                className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                  mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
+                }`}
+              >
+                Stock Goods
               </span>
             </div>
             <span 
