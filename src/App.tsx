@@ -537,8 +537,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedInquiryProduct(p);
-                  setIsInquiryOpen(true);
+                  navigateTo(`/product/${p.id}`);
                 }}
                 className="w-full py-2 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[10px] sm:text-xs uppercase tracking-wide rounded transition-all mt-2"
               >
@@ -819,7 +818,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                           <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedInquiryProduct(p); setIsInquiryOpen(true); }}
+                          onClick={(e) => { e.stopPropagation(); navigateTo(`/product/${p.id}`); }}
                           className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
                         >
                           Inquire Now
