@@ -394,9 +394,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
   if (routeParams.route === "admin") {
     return <AdminPanel />;
   }
-  if (routeParams.route === "about") {
-    return <AboutUs onNavigate={navigateTo} />;
-  }
+
 
   // Filter products reactively by search query and category (for homepage layout)
   const filteredProducts = products.filter((p) => {
@@ -1801,6 +1799,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           })()}
 
         </div>
+      )}
+
+      {routeParams.route === "about" && (
+        <AboutUs onNavigate={navigateTo} />
       )}
 
       <footer className="bg-[#0b1329] text-slate-300 py-8 px-4 border-t border-white/5 font-mono text-xs mt-auto">

@@ -9,6 +9,15 @@ const contactInfo = {
 export default function AboutUs({ onNavigate }: { onNavigate: (path: string) => void }) {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-slate-200 px-4 py-3">
+        <div className="max-w-5xl mx-auto flex items-center gap-2 text-xs font-mono text-slate-500">
+          <span className="hover:text-primary cursor-pointer" onClick={() => onNavigate("/")}>Home</span>
+          <span>/</span>
+          <span className="font-bold text-slate-800">About Us</span>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#0b1329] to-[#1a2744] text-white py-16 px-4 border-b-4 border-[#feae2c]">
         <div className="max-w-5xl mx-auto text-center">
