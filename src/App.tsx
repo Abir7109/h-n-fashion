@@ -10,6 +10,7 @@ import InquiryModal from "./components/InquiryModal";
 import ManifestModal from "./components/ManifestModal";
 import AdminPanel from "./components/AdminPanel";
 import { trackPageView, trackProductView, fetchRecommendations } from "./utils/analytics";
+import localProducts from "./data/products.json";
 
 const factoryInsideImg = "/src/assets/images/garment_factory_inside_1779255984639.png";
 
@@ -127,12 +128,14 @@ export default function App() {
         const data = await response.json();
         setProducts(data);
         fetchRecommendations().then(setRecommendedProducts);
+        return;
       }
     } catch (err) {
       console.error("Communications error fetching products", err);
-    } finally {
-      setLoading(false);
     }
+    // Fallback to local data when API fails
+    setProducts(localProducts as Product[]);
+    setLoading(false);
   };
 
   // Submit General B2B Inquiry form

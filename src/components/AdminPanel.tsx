@@ -214,12 +214,6 @@ export default function AdminPanel() {
                 />
               </div>
 
-              <div className="p-3 bg-white/5 rounded-xl text-[11px] text-slate-400 font-mono space-y-1 border border-white/5">
-                <span className="font-bold text-[#feae2c] block">Demo Credentials:</span>
-                <p>Username: <span className="font-bold text-white">Abir</span></p>
-                <p>Password: <span className="font-bold text-white">Abir123</span></p>
-              </div>
-
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-[#feae2c] to-[#ffc933] hover:from-[#e09d25] hover:to-[#f0b92e] text-[#0b1329] font-display font-black text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-lg shadow-[#feae2c]/20 cursor-pointer"
