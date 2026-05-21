@@ -23,7 +23,14 @@ app.get("/api/products", async (req, res) => {
       query = query.eq("product_type", type);
     }
     const { data, error } = await query;
-    if (error) return res.status(500).json({ error: error.message, code: error.code, details: error.details, hint: error.hint });
+    if (error) {
+      // Fallback: column might not exist, try without type filter
+      if ((error.code === "42703" || error.message?.includes("does not exist")) && type) {
+        const { data: fallback } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+        return res.json(fallback || []);
+      }
+      return res.status(500).json({ error: error.message, code: error.code, details: error.details, hint: error.hint });
+    }
     res.json(data || []);
   } catch (e: any) {
     res.status(500).json({ error: e?.message || String(e), stack: e?.stack?.substring(0, 500), name: e?.name, url: supabaseUrl.substring(0, 40) });
@@ -68,47 +75,32 @@ app.delete("/api/products/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-// HELPERS
-async function ensureTables() {
-  const sql = `
-    CREATE TABLE IF NOT EXISTS inquiries (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      full_name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      company TEXT NOT NULL,
-      categories TEXT[] DEFAULT '{}',
-      message TEXT NOT NULL DEFAULT '',
-      product_title TEXT,
-      product_sku TEXT,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-    ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
-    DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
-    DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
-    CREATE POLICY "Public can insert inquiries" ON inquiries FOR INSERT TO anon WITH CHECK (true);
-    CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticated USING (true);
-  `;
-  // Use Supabase REST API raw SQL endpoint (requires service_role key)
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) return false;
-  const url = `${supabaseUrl}/rest/v1/rpc/`;
-  try {
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` },
-      body: JSON.stringify({ query: sql }),
-    });
-    return true;
-  } catch { return false; }
-}
+// MIGRATE - returns the SQL the user must run in Supabase dashboard
+const MIGRATE_SQL = `
+-- 1. Add product_type column to products (if missing)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS product_type TEXT NOT NULL DEFAULT 'stock';
 
-// MIGRATE - auto-create missing tables
-app.post("/api/migrate", async (_req, res) => {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) return res.status(400).json({ error: "SUPABASE_SERVICE_ROLE_KEY not set in environment. Add it in Netlify dashboard > Environment variables." });
-  const ok = await ensureTables();
-  if (!ok) return res.status(500).json({ error: "Migration failed. Check service_role key permissions." });
-  res.json({ success: true, message: "Tables created successfully." });
+-- 2. Create inquiries table
+CREATE TABLE IF NOT EXISTS inquiries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  company TEXT NOT NULL,
+  categories TEXT[] DEFAULT '{}',
+  message TEXT NOT NULL DEFAULT '',
+  product_title TEXT,
+  product_sku TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
+DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
+CREATE POLICY "Public can insert inquiries" ON inquiries FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticated USING (true);
+`;
+
+app.get("/api/migrate", async (_req, res) => {
+  res.json({ success: true, sql: MIGRATE_SQL, instructions: "Copy this SQL and run it in your Supabase dashboard > SQL Editor." });
 });
 
 // INQUIRIES
@@ -129,20 +121,11 @@ app.post("/api/inquiries", async (req, res) => {
     product_sku: req.body.productSku,
   }).select().single();
   if (error) {
-    // Try auto-creating the table on "relation does not exist"
     if (error.message?.includes("relation") || error.code === "42P01") {
-      await ensureTables();
-      const retry = await supabase.from("inquiries").insert({
-        full_name: req.body.fullName || "Anonymous",
-        email: req.body.email || "N/A",
-        company: req.body.company || "N/A",
-        categories: req.body.categories || [],
-        message: req.body.message || "No message",
-        product_title: req.body.productTitle,
-        product_sku: req.body.productSku,
-      }).select().single();
-      if (retry.error) return res.status(500).json({ error: retry.error.message });
-      return res.status(201).json(retry.data);
+      return res.status(500).json({
+        error: "The 'inquiries' table does not exist in your Supabase database.",
+        hint: "Visit /api/migrate to get the SQL, then run it in Supabase dashboard > SQL Editor."
+      });
     }
     return res.status(500).json({ error: error.message });
   }
