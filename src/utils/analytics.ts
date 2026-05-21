@@ -27,10 +27,10 @@ export function trackProductView(productId: string, category: string) {
   trackEvent("productview", { productId, category, path: window.location.pathname });
 }
 
-export async function fetchRecommendations(): Promise<any[]> {
+export async function fetchRecommendations(type?: string): Promise<any[]> {
   try {
     const visitorId = getVisitorId();
-    const res = await fetch(`/api/analytics/recommendations?visitorId=${encodeURIComponent(visitorId)}`);
+    const res = await fetch(`/api/analytics/recommendations?visitorId=${encodeURIComponent(visitorId)}${type ? `&type=${type}` : ""}`);
     if (res.ok) return await res.json();
     return [];
   } catch { return []; }

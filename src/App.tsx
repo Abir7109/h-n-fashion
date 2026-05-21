@@ -158,18 +158,17 @@ export default function App() {
       const response = await fetch(`/api/products?type=${mode}`);
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.filter((p: Product) => (p.productType || "stock") === mode));
         setLoading(false);
-        fetchRecommendations().then(setRecommendedProducts);
+        fetchRecommendations(mode).then(setRecommendedProducts);
         return;
       }
     } catch (err) {
       console.error("Communications error fetching products", err);
     }
-    const localFiltered = (localProducts as Product[]).filter(
+    setProducts((localProducts as Product[]).filter(
       p => (p.productType || "stock") === mode
-    );
-    setProducts(localFiltered.length > 0 ? localFiltered : localProducts as Product[]);
+    ));
     setLoading(false);
   };
 

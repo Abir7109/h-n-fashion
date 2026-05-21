@@ -28,21 +28,13 @@ async function startServer() {
 
   // PRODUCTS API
   app.get("/api/products", async (req, res) => {
-    const type = req.query.type as string;
-    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-    if (type === "fresh" || type === "stock") {
-      query = query.eq("product_type", type);
+    try {
+      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+      if (error) return res.status(500).json({ error: error.message });
+      res.json(data || []);
+    } catch (e: any) {
+      res.status(500).json({ error: e?.message || String(e) });
     }
-    const { data, error } = await query;
-    if (error) {
-      // Fallback: column might not exist, try without type filter
-      if ((error.code === "42703" || error.message?.includes("does not exist")) && type) {
-        const { data: fallback } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-        return res.json(fallback || []);
-      }
-      return res.status(500).json({ error: error.message });
-    }
-    res.json(data);
   });
 
   app.post("/api/products", async (req, res) => {
@@ -296,7 +288,8 @@ CREATE POLICY "Public can read inquiries" ON inquiries FOR SELECT TO anon USING 
       if (visitor) recommendedCategories = visitor.categories || [];
     }
 
-    let query = supabase.from("products").select("*").eq("product_type", "stock");
+    const recType = req.query.type === "fresh" ? "fresh" : "stock";
+    let query = supabase.from("products").select("*").eq("product_type", recType);
 
     if (recommendedCategories.length > 0) {
       query = query.in("category", recommendedCategories);

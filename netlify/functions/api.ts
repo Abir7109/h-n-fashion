@@ -17,23 +17,13 @@ app.get("/api/debug", (_req, res) => {
 // PRODUCTS
 app.get("/api/products", async (req, res) => {
   try {
-    const type = req.query.type as string;
-    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-    if (type === "fresh" || type === "stock") {
-      query = query.eq("product_type", type);
-    }
-    const { data, error } = await query;
+    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
     if (error) {
-      // Fallback: column might not exist, try without type filter
-      if ((error.code === "42703" || error.message?.includes("does not exist")) && type) {
-        const { data: fallback } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-        return res.json(fallback || []);
-      }
       return res.status(500).json({ error: error.message, code: error.code, details: error.details, hint: error.hint });
     }
     res.json(data || []);
   } catch (e: any) {
-    res.status(500).json({ error: e?.message || String(e), stack: e?.stack?.substring(0, 500), name: e?.name, url: supabaseUrl.substring(0, 40) });
+    res.status(500).json({ error: e?.message || String(e), stack: e?.stack?.substring(0, 500), name: e?.name });
   }
 });
 
@@ -215,23 +205,24 @@ app.get("/api/analytics/summary", async (_req, res) => {
 // RECOMMENDATIONS
 app.get("/api/analytics/recommendations", async (req, res) => {
   const visitorId = req.query.visitorId as string;
+  const type = req.query.type === "fresh" ? "fresh" : "stock";
   let cats: string[] = [];
   if (visitorId) {
     const { data } = await supabase.from("visitors").select("categories").eq("visitor_id", visitorId).single();
     if (data) cats = data.categories || [];
   }
-  let query = supabase.from("products").select("*");
+  let query = supabase.from("products").select("*").eq("product_type", type);
   if (cats.length > 0) query = query.in("category", cats);
   const { data: products } = await query.limit(8);
   let recs = products || [];
   if (recs.length < 4) {
     const ids = new Set(recs.map((r: any) => r.id));
-    const { data: feat } = await supabase.from("products").select("*").eq("featured", true).limit(8 - recs.length);
+    const { data: feat } = await supabase.from("products").select("*").eq("featured", true).eq("product_type", type).limit(8 - recs.length);
     recs = [...recs, ...(feat || []).filter((f: any) => !ids.has(f.id))];
   }
   if (recs.length < 4) {
     const ids = new Set(recs.map((r: any) => r.id));
-    const { data: rest } = await supabase.from("products").select("*").limit(8 - recs.length);
+    const { data: rest } = await supabase.from("products").select("*").eq("product_type", type).limit(8 - recs.length);
     recs = [...recs, ...(rest || []).filter((r: any) => !ids.has(r.id))];
   }
   res.json(recs.slice(0, 8));
