@@ -2,16 +2,17 @@ import express from "express";
 import serverless from "serverless-http";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://hjvqfvrgwgoffqgdmpob.supabase.co";
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnFmdnJnd2dvZmZxZ2RtcG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDY3ODksImV4cCI6MjA5NDkyMjc4OX0.3NQ5e90FAydaLM_KCtLbbpEX5l4gKxOp4vQpuAd2MHA";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Debug endpoint
-const dbgUrl = supabaseUrl ? "set" : "NOT SET";
-const dbgKey = supabaseAnonKey ? "set" : "NOT SET";
 
 const app = express();
 app.use(express.json());
+
+// Debug endpoint
+app.get("/api/debug", (_req, res) => {
+  res.json({ supabaseUrl: supabaseUrl ? supabaseUrl.substring(0, 30) + "..." : "NOT SET", anonKey: supabaseAnonKey ? "SET (" + supabaseAnonKey.substring(0, 20) + "..." : "NOT SET" });
+});
 
 // PRODUCTS
 app.get("/api/products", async (_req, res) => {
