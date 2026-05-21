@@ -639,7 +639,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
             className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0"
           >
-            <div className="relative">
+            <div className="relative min-w-0">
               <img
                 src={p.image}
                 alt={p.title}
