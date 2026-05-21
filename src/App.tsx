@@ -9,6 +9,7 @@ import { Product, CATEGORIES } from "./types";
 import InquiryModal from "./components/InquiryModal";
 import ManifestModal from "./components/ManifestModal";
 import AdminPanel from "./components/AdminPanel";
+import AboutUs from "./components/AboutUs";
 import { trackPageView, trackProductView, fetchRecommendations } from "./utils/analytics";
 import localProducts from "./data/products.json";
 
@@ -47,6 +48,9 @@ export default function App() {
     }
     if (currentPath === "/products" || currentPath === "/all-products") {
       return { route: "products" };
+    }
+    if (currentPath === "/about" || currentPath === "/about-us") {
+      return { route: "about" };
     }
     return { route: "home" };
   };
@@ -390,6 +394,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
   if (routeParams.route === "admin") {
     return <AdminPanel />;
   }
+  if (routeParams.route === "about") {
+    return <AboutUs onNavigate={navigateTo} />;
+  }
 
   // Filter products reactively by search query and category (for homepage layout)
   const filteredProducts = products.filter((p) => {
@@ -607,6 +614,12 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             >
               Products
             </a>
+            <span 
+              onClick={() => navigateTo("/about")}
+              className="hover:text-secondary transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
+            >
+              About Us
+            </span>
             <a 
               href="#inquiry"
               onClick={(e) => { e.preventDefault(); document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }); }}
@@ -637,6 +650,12 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             >
               Products
             </a>
+            <span 
+              onClick={() => { setIsMobileMenuOpen(false); navigateTo("/about"); }}
+              className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
+            >
+              About Us
+            </span>
             <a 
               href="#inquiry"
               onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }); }}
@@ -1808,8 +1827,15 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 text-center text-[10px] text-slate-500">
+        <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 text-center text-[10px] text-slate-500 space-y-1">
           <p>© 2026 H and N Fashion BD. All Rights Reserved.</p>
+          <p>
+            Crafted with ❤️ by{" "}
+            <a href="https://rmabir71.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-[#feae2c] hover:text-white font-bold transition-colors inline-flex items-center gap-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              RM's_Development
+            </a>
+          </p>
         </div>
       </footer>
 
