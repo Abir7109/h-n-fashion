@@ -1019,7 +1019,8 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         View All <ChevronRight size={12} />
                       </button>
                     </div>
-                    <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none -mx-3 px-3">
+                    <div className="w-full overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none">
+                      <div className="flex gap-3" style={{width: "max-content", minWidth: "100%"}}>
                       {catProducts.map((p) => (
                         <div
                           key={p.id}
@@ -1061,9 +1062,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                       ))}
                     </div>
                   </div>
-                ));
-              })()
-            )}
+                </div>
+              ));
+            })()
+          )}
 
             {/* Divider line */}
             <div className="border-t border-slate-200"></div>
