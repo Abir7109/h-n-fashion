@@ -1,0 +1,6 @@
+{
+  "name": "StockLot BD",
+  "description": "Authentic B2B stock lot garments wholesale supplier portal and admin control panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
