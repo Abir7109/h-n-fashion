@@ -631,14 +631,11 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         </div>
       );
     }
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full max-w-full">
+    return (<>
+      <style>{`@media (min-width:640px){.grid-card{width:calc(33.333% - 0.5rem)}}@media (min-width:1024px){.grid-card{width:calc(25% - 0.5625rem)}}`}</style>
+      <div className="flex flex-wrap w-full max-w-full" style={{gap: "0.75rem"}}>
         {items.map((p) => (
-          <div
-            key={p.id}
-            onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0"
-          >
+          <div key={p.id} onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)} className="grid-card group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer" style={{width: "calc(50% - 0.375rem)", flex: "0 0 auto"}}>
             <div className="relative min-w-0">
               <img
                 src={p.image}
@@ -693,7 +690,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           </div>
         ))}
       </div>
-    );
+    </>);
   };
 
   return (
