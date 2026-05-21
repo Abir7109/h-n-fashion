@@ -35,16 +35,24 @@ export default function App() {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
-  // Detect mode from path
+  // Detect mode from path: default to fresh, stock only via /stock-goods or /stock
   const getMode = (): 'stock' | 'fresh' => {
-    return currentPath.startsWith("/fresh-goods") ? "fresh" : "stock";
+    if (currentPath.startsWith("/stock-goods") || currentPath === "/stock" || currentPath.startsWith("/stock/")) {
+      return "stock";
+    }
+    return "fresh";
   };
   const mode = getMode();
 
   // Clean path for routing by stripping mode prefix
-  const cleanPath = currentPath.startsWith("/fresh-goods")
-    ? currentPath.replace("/fresh-goods", "") || "/"
-    : currentPath;
+  const cleanPath = (() => {
+    let p = currentPath;
+    if (p.startsWith("/stock-goods")) p = p.replace("/stock-goods", "") || "/";
+    else if (p.startsWith("/stock/")) p = p.replace("/stock", "") || "/";
+    else if (p === "/stock") p = "/";
+    else if (p.startsWith("/fresh-goods")) p = p.replace("/fresh-goods", "") || "/";
+    return p;
+  })();
 
   // Helper to parse dynamic URLs
   const getRouteParams = () => {
@@ -138,7 +146,7 @@ export default function App() {
     if (scrollTo === "products" || scrollTo === "inquiry") {
       setTimeout(() => {
         document.getElementById(scrollTo)?.scrollIntoView({ behavior: "smooth" });
-        const base = mode === "fresh" ? "/fresh-goods" : "/";
+        const base = mode === "fresh" ? "/" : "/stock-goods";
         window.history.replaceState({}, "", base);
       }, 300);
     }
@@ -325,9 +333,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
     if (mode === "fresh") {
       const freshAlternates: { [key: string]: string[] } = {
         "t-shirt": [
-          "https://images.unsplash.com/photo-1556301249-1cdb8e5e2e1a?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
           "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1586771109-1c5b7b9c9f7e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800",
         ],
         "polo shirt": [
           "https://images.unsplash.com/photo-1594930329750-e7d5dc5e7b3e?auto=format&fit=crop&q=80&w=800",
@@ -337,53 +345,53 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         "tank top": [
           "https://images.unsplash.com/photo-1582412466850-1e029f9c56e0?auto=format&fit=crop&q=80&w=800",
           "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&q=80&w=800",
         ],
         "leggings": [
           "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1598254781-6b9c6b4f7b2e?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1483721310020-03333e577078?auto=format&fit=crop&q=80&w=800",
         ],
         "pant": [
           "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1598550472066-76fb1fa2b6eb?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=800",
         ],
         "jogger": [
           "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1586771109-1c5b7b9c9f7e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=800",
           "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800",
         ],
         "hoodie": [
           "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1503341504253-d6123f1c1c1e?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1600134950351-5e8fd22927d1?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800",
         ],
         "boxer": [
           "https://images.unsplash.com/photo-1589310240389-fc6e8aa8e158?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1578940443562-d5061c00f4b9?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1608236451172-3d9cf7f78dc2?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1616606103915-dea7be788566?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1562572159-4ebcd318f4dd?auto=format&fit=crop&q=80&w=800",
         ],
         "shirt": [
           "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1544027993-37d0750ab5c2?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1598254781-6b9c6b4f7b2e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=800",
         ],
         "denim pant": [
           "https://images.unsplash.com/photo-1565084888279-3b9bb2f7a5f1?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=800",
         ],
         "denim shirt": [
           "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1600134950351-5e8fd22927d1?auto=format&fit=crop&q=80&w=800",
-          "https://images.unsplash.com/photo-1598550472066-76fb1fa2b6eb?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
         ],
       };
       const alt = freshAlternates[category] || [
-        "https://images.unsplash.com/photo-1556301249-1cdb8e5e2e1a?auto=format&fit=crop&q=80&w=800",
-        "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
-        "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800",
       ];
       const mainZoom = `${mainImage.split("?")[0]}?auto=format&fit=crop&q=80&w=800&rect=100,100,600,600`;
       return [mainImage, alt[0], alt[1], alt[2] || mainZoom];
@@ -567,7 +575,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
   // Reusable Category Navigation filter header
   const renderCategoryFilterHeader = () => {
     const categories = mode === "fresh" ? FRESH_CATEGORIES : CATEGORIES;
-    const homeLink = mode === "fresh" ? "/fresh-goods" : "/";
+            const homeLink = mode === "fresh" ? "/" : "/stock-goods";
     return (
       <div className="flex flex-col gap-3 border-b border-slate-200 pb-4">
         <div className="flex flex-wrap gap-1.5 items-center -mx-1 px-1">
@@ -589,8 +597,8 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             const count = products.filter((p) => p.category === cat).length;
             const isCatActive = routeParams.route === "category" && routeParams.slug?.toLowerCase() === cat.toLowerCase();
             const catLink = mode === "fresh"
-              ? `/fresh-goods/category/${encodeURIComponent(cat)}`
-              : `/category/${encodeURIComponent(cat)}`;
+              ? `/category/${encodeURIComponent(cat)}`
+              : `/stock-goods/category/${encodeURIComponent(cat)}`;
             return (
               <button
                 type="button"
@@ -628,7 +636,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         {items.map((p) => (
           <div
             key={p.id}
-            onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`)}
+            onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
             className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
           >
             {/* Image Wrapper */}
@@ -675,7 +683,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`);
+                  navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`);
                 }}
                 className="w-full py-2 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[10px] sm:text-xs uppercase tracking-wide rounded transition-all mt-2"
               >
@@ -740,7 +748,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-300 whitespace-nowrap">
             {/* Mode Tabs */}
             <span 
-              onClick={() => navigateTo("/")}
+              onClick={() => navigateTo("/stock-goods")}
               className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
                 mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
               }`}
@@ -748,7 +756,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               Stock Goods
             </span>
             <span 
-              onClick={() => navigateTo("/fresh-goods")}
+              onClick={() => navigateTo("/")}
               className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
                 mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
               }`}
@@ -758,7 +766,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             <span className="text-slate-600 mx-1">|</span>
             <span 
               onClick={() => {
-                const productsLink = mode === "fresh" ? "/fresh-goods/products" : "/products";
+                const productsLink = mode === "fresh" ? "/products" : "/stock-goods/products";
                 navigateTo(productsLink);
               }}
               className="hover:text-[#feae2c] transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
@@ -774,7 +782,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             <span 
               onClick={() => {
                 if (routeParams.route !== "home") {
-                  const inquiryLink = mode === "fresh" ? "/fresh-goods?scroll=inquiry" : "/?scroll=inquiry";
+                  const inquiryLink = mode === "fresh" ? "/?scroll=inquiry" : "/stock-goods?scroll=inquiry";
                   navigateTo(inquiryLink);
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
@@ -803,7 +811,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             {/* Mode Tabs for mobile */}
             <div className="flex gap-2 pb-2 border-b border-white/5">
               <span 
-                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/"); }}
+                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/stock-goods"); }}
                 className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
                 }`}
@@ -811,7 +819,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 Stock Goods
               </span>
               <span 
-                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/fresh-goods"); }}
+                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/"); }}
                 className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
                   mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
                 }`}
@@ -822,7 +830,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             <span 
               onClick={() => { 
                 setIsMobileMenuOpen(false);
-                const productsLink = mode === "fresh" ? "/fresh-goods/products" : "/products";
+                const productsLink = mode === "fresh" ? "/products" : "/stock-goods/products";
                 navigateTo(productsLink);
               }}
               className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
@@ -839,7 +847,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               onClick={() => { 
                 setIsMobileMenuOpen(false);
                 if (routeParams.route !== "home") {
-                  const inquiryLink = mode === "fresh" ? "/fresh-goods?scroll=inquiry" : "/?scroll=inquiry";
+                  const inquiryLink = mode === "fresh" ? "/?scroll=inquiry" : "/stock-goods?scroll=inquiry";
                   navigateTo(inquiryLink);
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
@@ -1057,7 +1065,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   {recommendedProducts.map((p) => (
                     <div
                       key={p.id}
-                      onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`)}
+                      onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
                       className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
                     >
                       <div className="relative bg-slate-100 h-36 xs:h-40 sm:h-44 overflow-hidden">
@@ -1092,7 +1100,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                           <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`); }}
+                          onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
                           className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
                         >
                           Inquire Now
@@ -1271,7 +1279,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         <div className="flex-1 max-w-7xl mx-auto px-2.5 xs:px-4 py-8 space-y-8 w-full animate-fadeIn">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")}>Home</span>
             <span>/</span>
             <span className="font-bold text-slate-800">{mode === "fresh" ? "Fresh Apparel Catalog" : "All Products Catalog"}</span>
           </div>
@@ -1470,9 +1478,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         <div className="flex-1 max-w-7xl mx-auto px-2.5 xs:px-4 py-8 space-y-8 w-full">
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")}>Home</span>
             <span>/</span>
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>{mode === "fresh" ? "Fresh Categories" : "Category Sourcing"}</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")}>{mode === "fresh" ? "Fresh Categories" : "Category Sourcing"}</span>
             <span>/</span>
             <span className="font-bold text-slate-800">{routeParams.slug}</span>
           </div>
@@ -1619,7 +1627,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               return (
                 <div className="p-16 border rounded bg-white text-center text-slate-500 italic max-w-md mx-auto space-y-4">
                   <p>Product Sourcing Index not found or currently updating.</p>
-                  <button onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")} className="px-4 py-2 bg-slate-900 text-[#feae2c] font-bold text-xs uppercase rounded cursor-pointer">
+                  <button onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")} className="px-4 py-2 bg-slate-900 text-[#feae2c] font-bold text-xs uppercase rounded cursor-pointer">
                     Return to {mode === "fresh" ? "Fresh Goods" : "Dhaka Hub"} Catalog
                   </button>
                 </div>
@@ -1630,9 +1638,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <>
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
+                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")}>Home</span>
                   <span>/</span>
-                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/category/${encodeURIComponent(prod.category)}`)}>{prod.category}</span>
+                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/category/${encodeURIComponent(prod.category)}`)}>{prod.category}</span>
                   <span>/</span>
                   <span className="font-bold text-slate-800">SKU #{prod.sku}</span>
                 </div>
@@ -1640,7 +1648,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 {/* Return anchor */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-b border-slate-100 pb-5">
                   <button
-                    onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}
+                    onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")}
                     className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-slate-700 hover:text-indigo-950 cursor-pointer"
                   >
                     <ArrowLeft size={14} /> Back to {mode === "fresh" ? "Fresh Goods" : "Sourcing clearing"} home page
@@ -1693,7 +1701,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigateTo(mode === "fresh" ? "/fresh-goods/products" : "/products");
+                              navigateTo(mode === "fresh" ? "/products" : "/stock-goods/products");
                             }}
                             className="bg-[#feae2c] hover:bg-[#0b1329] hover:text-[#feae2c] text-indigo-950 font-display font-black text-[9px] uppercase tracking-wider px-2 py-1 rounded shadow border border-[#feae2c]/20 flex items-center gap-1 cursor-pointer transition-all active:scale-95 duration-150 animate-fadeIn"
                             title="View all products"
