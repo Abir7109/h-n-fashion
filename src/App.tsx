@@ -158,7 +158,7 @@ export default function App() {
       const response = await fetch(`/api/products?type=${mode}`);
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.filter((p: Product) => (p.productType || "stock") === mode));
+        setProducts(data.filter((p: Product) => ((p as any).product_type || p.productType || "stock") === mode));
         setLoading(false);
         fetchRecommendations(mode).then(setRecommendedProducts);
         return;

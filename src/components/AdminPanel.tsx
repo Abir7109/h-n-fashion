@@ -114,7 +114,7 @@ export default function AdminPanel() {
     setQty(prod.qty.toString()); setCategory(prod.category);
     setStatus(prod.status); setMaterial(prod.material); setMoq(prod.moq.toString());
     setImage(prod.image); setFeatured(prod.featured);
-    setProductType(prod.productType || 'stock'); setIsFormOpen(true);
+    setProductType((prod as any).product_type || prod.productType || 'stock'); setIsFormOpen(true);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -142,7 +142,7 @@ export default function AdminPanel() {
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-    const matchesType = productTypeFilter === "all" || (p.productType || "stock") === productTypeFilter;
+    const matchesType = productTypeFilter === "all" || ((p as any).product_type || p.productType || "stock") === productTypeFilter;
     return matchesSearch && matchesCategory && matchesType;
   });
 
@@ -731,8 +731,8 @@ export default function AdminPanel() {
                             <span className="bg-white/5 text-slate-300 font-bold uppercase text-[9px] px-2 py-1 rounded-lg">{p.category}</span>
                           </td>
                           <td className="p-3">
-                            <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-lg ${(p.productType || "stock") === "fresh" ? "bg-emerald-500/10 text-emerald-400" : "bg-[#feae2c]/10 text-[#feae2c]"}`}>
-                              {(p.productType || "stock") === "fresh" ? "Fresh" : "Stock"}
+                            <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-lg ${((p as any).product_type || p.productType || "stock") === "fresh" ? "bg-emerald-500/10 text-emerald-400" : "bg-[#feae2c]/10 text-[#feae2c]"}`}>
+                              {((p as any).product_type || p.productType || "stock") === "fresh" ? "Fresh" : "Stock"}
                             </span>
                           </td>
                           <td className="p-3 text-right font-bold text-emerald-400">{p.qty.toLocaleString()}</td>
