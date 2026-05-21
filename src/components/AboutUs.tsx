@@ -124,7 +124,7 @@ export default function AboutUs({ onNavigate }: { onNavigate: (path: string) => 
             <h2 className="font-display font-black text-2xl sm:text-3xl text-[#0b1329] uppercase">Meet Our Leadership</h2>
           </div>
           <div className="max-w-md mx-auto bg-[#0b1329] rounded-2xl p-8 text-center border border-white/10 shadow-xl">
-            <div className="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-2 border-[#feae2c]">
+            <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-2 border-[#feae2c]">
               <img src="/aboutus.jpeg" alt="Humayun Kabir" className="w-full h-full object-cover" />
             </div>
             <h3 className="font-display font-black text-xl text-white">Humayun Kabir</h3>
