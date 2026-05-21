@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS products (
 -- Enable Row Level Security
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read products" ON products;
+DROP POLICY IF EXISTS "Admin can insert products" ON products;
+DROP POLICY IF EXISTS "Admin can update products" ON products;
+DROP POLICY IF EXISTS "Admin can delete products" ON products;
+
 -- Public can read products
 CREATE POLICY "Public can read products"
   ON products FOR SELECT
@@ -59,6 +64,9 @@ CREATE TABLE IF NOT EXISTS inquiries (
 
 ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
+DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
+
 -- Public can insert inquiries (contact form)
 CREATE POLICY "Public can insert inquiries"
   ON inquiries FOR INSERT
@@ -89,6 +97,9 @@ CREATE INDEX IF NOT EXISTS idx_analytics_date ON analytics_events(created_at);
 
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can insert analytics" ON analytics_events;
+DROP POLICY IF EXISTS "Admin can read analytics" ON analytics_events;
+
 -- Public can insert analytics events
 CREATE POLICY "Public can insert analytics"
   ON analytics_events FOR INSERT
@@ -112,6 +123,10 @@ CREATE TABLE IF NOT EXISTS visitors (
 );
 
 ALTER TABLE visitors ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can upsert visitors" ON visitors;
+DROP POLICY IF EXISTS "Public can update visitors" ON visitors;
+DROP POLICY IF EXISTS "Admin can read visitors" ON visitors;
 
 -- Public can upsert visitors
 CREATE POLICY "Public can upsert visitors"
@@ -139,6 +154,8 @@ CREATE TABLE IF NOT EXISTS admin_profiles (
 );
 
 ALTER TABLE admin_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin can read own profile" ON admin_profiles;
 
 -- Admin can read their own profile
 CREATE POLICY "Admin can read own profile"
@@ -239,10 +256,21 @@ END;
 $$;
 
 -- ============================================================
--- SEED DATA (Optional - run if you want sample products)
+-- SEED DATA
 -- ============================================================
 
--- INSERT INTO products (title, sku, qty, category, status, material, moq, featured, image)
--- VALUES
---   ('LADIES FULL ZIP HOODIE WITH KANGAROO POCKET SWEATER', '786-160426', 44000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, true, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.44 PM.jpeg'),
---   ('MEN''S V-NECK SWEATER - AMAZON ESSENTIALS', 'AMZ-2024', 5500, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, true, '/product-images/men/WhatsApp Image 2026-05-19 at 10.55.40 PM.jpeg');
+INSERT INTO products (title, sku, qty, category, status, material, moq, featured, image)
+SELECT * FROM (VALUES
+  ('LADIES FULL ZIP HOODIE WITH KANGAROO POCKET SWEATER', '786-160426', 44000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, true, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.44 PM.jpeg'),
+  ('LADIES KNITWEAR SWEATER - RAYON BLEND', '786-160426-A', 38000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, true, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.45 PM.jpeg'),
+  ('LADIES HOODIE SWEATER - KANGAROO POCKET', '786-160426-B', 42000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, true, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.46 PM.jpeg'),
+  ('LADIES FULL ZIP SWEATER - XS TO L', '786-160426-C', 40000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, false, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.47 PM.jpeg'),
+  ('LADIES KNIT HOODIE - 3 COLOR', '786-160426-D', 40000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, false, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.48 PM.jpeg'),
+  ('LADIES SWEATER LOT - NEW PORT', '786-160426-E', 40000, 'Women', 'Shipment Cancel - In Factory', '52% Rayon 28% Polyester 7GG', 2000, false, '/product-images/women/WhatsApp Image 2026-05-19 at 10.54.52 PM.jpeg'),
+  ('MEN''S V-NECK SWEATER - AMAZON ESSENTIALS', 'AMZ-2024', 5500, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, true, '/product-images/men/WhatsApp Image 2026-05-19 at 10.55.40 PM.jpeg'),
+  ('MEN''S COTTON V-NECK KNITWEAR', 'AMZ-2024-A', 5200, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, true, '/product-images/men/WhatsApp Image 2026-05-19 at 10.55.41 PM.jpeg'),
+  ('MEN''S V-NECK SWEATER - XS TO XXL', 'AMZ-2024-B', 5000, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, true, '/product-images/men/WhatsApp Image 2026-05-19 at 10.55.42 PM.jpeg'),
+  ('MEN''S COTTON SWEATER - 10+ COLORS', 'AMZ-2024-C', 5000, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, false, '/product-images/men/WhatsApp Image 2026-05-19 at 10.55.43 PM.jpeg'),
+  ('MEN''S V-NECK OVERSTOCK LOT', 'AMZ-2024-D', 5100, 'Men', 'Shipment Cancel - Super Intact', '100% Cotton 12GG', 1000, false, '/product-images/men/WhatsApp Image 9 at 10.55.42 PM.jpeg')
+) AS s(title, sku, qty, category, status, material, moq, featured, image)
+WHERE NOT EXISTS (SELECT 1 FROM products LIMIT 1);
