@@ -1019,12 +1019,12 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         View All <ChevronRight size={12} />
                       </button>
                     </div>
-                    <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none -mx-3 px-3">
+                    <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none" style={{touchAction: "pan-x", WebkitOverflowScrolling: "touch"}}>
                       {catProducts.map((p) => (
                         <div
                           key={p.id}
                           onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-                          className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative"
+                          className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative min-w-0"
                         >
                           <img src={p.image} alt={p.title}
                             className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
