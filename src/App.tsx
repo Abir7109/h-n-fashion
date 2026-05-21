@@ -632,15 +632,15 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
       );
     }
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full max-w-full overflow-hidden">
         {items.map((p) => (
           <div
             key={p.id}
             onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0"
+            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0 max-w-full"
           >
             {/* Image Wrapper */}
-            <div className="relative bg-slate-100 w-full aspect-[4/3] overflow-hidden">
+            <div className="relative bg-slate-100 w-full pb-[75%] overflow-hidden">
               <img
                 src={p.image}
                 alt={p.title}
@@ -666,20 +666,20 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             </div>
 
             {/* Product Info */}
-            <div className="p-3 sm:p-4 space-y-2 flex-1">
-              <h4 className="font-display font-bold text-xs sm:text-sm text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+            <div className="p-3 sm:p-4 space-y-2 flex-1 min-w-0">
+              <h4 className="font-display font-bold text-xs sm:text-sm text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug break-words">
                 {p.title}
               </h4>
-              <div className="flex items-center gap-2 text-[10px] sm:text-xs">
-                <span className="bg-[#0b1329]/10 text-[#0b1329] px-2 py-0.5 rounded font-semibold">{p.category}</span>
-                <span className="text-slate-400">#{p.sku}</span>
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs flex-wrap min-w-0">
+                <span className="bg-[#0b1329]/10 text-[#0b1329] px-2 py-0.5 rounded font-semibold truncate max-w-full">{p.category}</span>
+                <span className="text-slate-400 shrink-0">#{p.sku}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                <div>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-100 min-w-0">
+                <div className="min-w-0">
                   <span className="text-[9px] text-slate-400 uppercase">Ready</span>
-                  <p className="font-bold text-primary text-sm">{p.qty.toLocaleString()} pcs</p>
+                  <p className="font-bold text-primary text-sm truncate">{p.qty.toLocaleString()} pcs</p>
                 </div>
-                <span className="text-[9px] sm:text-[10px] px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                <span className="text-[9px] sm:text-[10px] px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold shrink-0 ml-1 max-w-[50%] truncate">{p.status}</span>
               </div>
               <button
                 onClick={(e) => {
@@ -1069,7 +1069,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                       onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
                       className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
                     >
-                      <div className="relative bg-slate-100 w-full aspect-[4/3] overflow-hidden">
+                      <div className="relative bg-slate-100 w-full pb-[75%] overflow-hidden">
                         <img src={p.image} alt={p.title}
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           referrerPolicy="no-referrer" loading="lazy" />
