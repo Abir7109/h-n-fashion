@@ -605,26 +605,38 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300 whitespace-nowrap">
-            <a 
-              href="#products"
-              onClick={(e) => { e.preventDefault(); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="hover:text-secondary transition-colors uppercase tracking-wider shrink-0"
+            <span 
+              onClick={(e) => { 
+                if (routeParams.route !== "home") {
+                  navigateTo("/");
+                  setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 150);
+                } else {
+                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="hover:text-[#feae2c] transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
             >
               Products
-            </a>
+            </span>
             <span 
               onClick={() => navigateTo("/about")}
-              className="hover:text-secondary transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
+              className="hover:text-[#feae2c] transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
             >
               About Us
             </span>
-            <a 
-              href="#inquiry"
-              onClick={(e) => { e.preventDefault(); document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="hover:text-secondary transition-colors uppercase tracking-wider shrink-0"
+            <span 
+              onClick={(e) => { 
+                if (routeParams.route !== "home") {
+                  navigateTo("/");
+                  setTimeout(() => document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }), 150);
+                } else {
+                  document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="hover:text-[#feae2c] transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
             >
               Get Quote
-            </a>
+            </span>
           </div>
 
           {/* Hamburger Menu Toggle Button for Android/Mobile views */}
@@ -641,26 +653,40 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#0a1122] border-t border-white/5 px-4 py-4 space-y-3 animate-fadeIn">
-            <a 
-              href="#products"
-              onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] transition-all"
+            <span 
+              onClick={() => { 
+                setIsMobileMenuOpen(false);
+                if (routeParams.route !== "home") {
+                  navigateTo("/");
+                  setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 150);
+                } else {
+                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
             >
               Products
-            </a>
+            </span>
             <span 
               onClick={() => { setIsMobileMenuOpen(false); navigateTo("/about"); }}
               className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
             >
               About Us
             </span>
-            <a 
-              href="#inquiry"
-              onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] transition-all"
+            <span 
+              onClick={() => { 
+                setIsMobileMenuOpen(false);
+                if (routeParams.route !== "home") {
+                  navigateTo("/");
+                  setTimeout(() => document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }), 150);
+                } else {
+                  document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
             >
               Get Quote
-            </a>
+            </span>
           </div>
         )}
       </nav>
