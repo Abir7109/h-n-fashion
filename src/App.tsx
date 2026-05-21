@@ -632,20 +632,21 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
       );
     }
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
         {items.map((p) => (
           <div
             key={p.id}
             onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0"
           >
             {/* Image Wrapper */}
-            <div className="relative bg-slate-100 h-40 xs:h-48 sm:h-56 overflow-hidden">
+            <div className="relative bg-slate-100 w-full aspect-[4/3] overflow-hidden">
               <img
                 src={p.image}
                 alt={p.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
               
               {/* Category Overlays */}
@@ -1068,10 +1069,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                       onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
                       className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
                     >
-                      <div className="relative bg-slate-100 h-36 xs:h-40 sm:h-44 overflow-hidden">
+                      <div className="relative bg-slate-100 w-full aspect-[4/3] overflow-hidden">
                         <img src={p.image} alt={p.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          referrerPolicy="no-referrer" />
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer" loading="lazy" />
                         <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
                           {p.category}
                         </span>

@@ -68,6 +68,49 @@ app.delete("/api/products/:id", async (req, res) => {
   res.json({ success: true });
 });
 
+// HELPERS
+async function ensureTables() {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS inquiries (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      company TEXT NOT NULL,
+      categories TEXT[] DEFAULT '{}',
+      message TEXT NOT NULL DEFAULT '',
+      product_title TEXT,
+      product_sku TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "Public can insert inquiries" ON inquiries;
+    DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
+    CREATE POLICY "Public can insert inquiries" ON inquiries FOR INSERT TO anon WITH CHECK (true);
+    CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticated USING (true);
+  `;
+  // Use Supabase REST API raw SQL endpoint (requires service_role key)
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) return false;
+  const url = `${supabaseUrl}/rest/v1/rpc/`;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ query: sql }),
+    });
+    return true;
+  } catch { return false; }
+}
+
+// MIGRATE - auto-create missing tables
+app.post("/api/migrate", async (_req, res) => {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) return res.status(400).json({ error: "SUPABASE_SERVICE_ROLE_KEY not set in environment. Add it in Netlify dashboard > Environment variables." });
+  const ok = await ensureTables();
+  if (!ok) return res.status(500).json({ error: "Migration failed. Check service_role key permissions." });
+  res.json({ success: true, message: "Tables created successfully." });
+});
+
 // INQUIRIES
 app.get("/api/inquiries", async (_req, res) => {
   const { data, error } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
@@ -85,7 +128,24 @@ app.post("/api/inquiries", async (req, res) => {
     product_title: req.body.productTitle,
     product_sku: req.body.productSku,
   }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    // Try auto-creating the table on "relation does not exist"
+    if (error.message?.includes("relation") || error.code === "42P01") {
+      await ensureTables();
+      const retry = await supabase.from("inquiries").insert({
+        full_name: req.body.fullName || "Anonymous",
+        email: req.body.email || "N/A",
+        company: req.body.company || "N/A",
+        categories: req.body.categories || [],
+        message: req.body.message || "No message",
+        product_title: req.body.productTitle,
+        product_sku: req.body.productSku,
+      }).select().single();
+      if (retry.error) return res.status(500).json({ error: retry.error.message });
+      return res.status(201).json(retry.data);
+    }
+    return res.status(500).json({ error: error.message });
+  }
   res.status(201).json(data);
 });
 
