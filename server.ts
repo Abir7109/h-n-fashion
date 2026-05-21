@@ -150,8 +150,7 @@ CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticate
         product_title: req.body.productTitle,
         product_sku: req.body.productSku,
       })
-      .select()
-      .single();
+      .select();
     if (error) {
       if (error.message?.includes("relation") || error.code === "42P01") {
         return res.status(500).json({
@@ -161,7 +160,7 @@ CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticate
       }
       return res.status(500).json({ error: error.message });
     }
-    res.status(201).json(data);
+    res.status(201).json({ success: true, id: data?.[0]?.id });
   });
 
   // AUTH
