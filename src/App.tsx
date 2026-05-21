@@ -122,6 +122,14 @@ export default function App() {
     setActiveImageIndex(0);
     setIsMobileMenuOpen(false); // Close mobile drawer on routing
     trackPageView(currentPath);
+    const params = new URLSearchParams(window.location.search);
+    const scrollTo = params.get("scroll");
+    if (scrollTo === "products" || scrollTo === "inquiry") {
+      setTimeout(() => {
+        document.getElementById(scrollTo)?.scrollIntoView({ behavior: "smooth" });
+        window.history.replaceState({}, "", "/");
+      }, 300);
+    }
   }, [currentPath]);
 
   const fetchProducts = async () => {
@@ -606,10 +614,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300 whitespace-nowrap">
             <span 
-              onClick={(e) => { 
+              onClick={() => {
                 if (routeParams.route !== "home") {
-                  navigateTo("/");
-                  setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 150);
+                  navigateTo("/?scroll=products");
                 } else {
                   document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
                 }
@@ -625,10 +632,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               About Us
             </span>
             <span 
-              onClick={(e) => { 
+              onClick={() => {
                 if (routeParams.route !== "home") {
-                  navigateTo("/");
-                  setTimeout(() => document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }), 150);
+                  navigateTo("/?scroll=inquiry");
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
                 }
@@ -657,8 +663,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               onClick={() => { 
                 setIsMobileMenuOpen(false);
                 if (routeParams.route !== "home") {
-                  navigateTo("/");
-                  setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }), 150);
+                  navigateTo("/?scroll=products");
                 } else {
                   document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
                 }
@@ -677,8 +682,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               onClick={() => { 
                 setIsMobileMenuOpen(false);
                 if (routeParams.route !== "home") {
-                  navigateTo("/");
-                  setTimeout(() => document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" }), 150);
+                  navigateTo("/?scroll=inquiry");
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
                 }
