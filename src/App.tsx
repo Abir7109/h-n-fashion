@@ -632,38 +632,37 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
       );
     }
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full max-w-full overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full max-w-full">
         {items.map((p) => (
           <div
             key={p.id}
             onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer min-w-0 max-w-full"
+            className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
           >
-            {/* Image Wrapper */}
-            <div className="relative bg-slate-100 w-full pb-[75%] overflow-hidden">
+            <div className="relative">
               <img
                 src={p.image}
                 alt={p.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-40 xs:h-48 sm:h-56 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
-              
-              {/* Category Overlays */}
-              <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
-                {p.category}
-              </span>
-
-              {p.featured && (
-                <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
-                  Featured
+                
+                {/* Category Overlays */}
+                <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
+                  {p.category}
                 </span>
-              )}
 
-              <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
-                #{p.sku}
+                {p.featured && (
+                  <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
+                    Featured
+                  </span>
+                )}
+
+                <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
+                  #{p.sku}
+                </div>
               </div>
-            </div>
 
             {/* Product Info */}
             <div className="p-3 sm:p-4 space-y-2 flex-1 min-w-0">
@@ -1067,11 +1066,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     <div
                       key={p.id}
                       onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-                      className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+                      className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative"
                     >
-                      <div className="relative bg-slate-100 w-full pb-[75%] overflow-hidden">
-                        <img src={p.image} alt={p.title}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      <img src={p.image} alt={p.title}
+                          className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
                           referrerPolicy="no-referrer" loading="lazy" />
                         <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
                           {p.category}
@@ -1084,7 +1082,6 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
                           #{p.sku}
                         </div>
-                      </div>
                       <div className="p-2.5 sm:p-3 space-y-1.5">
                         <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                           {p.title}
