@@ -139,7 +139,7 @@ CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticate
   });
 
   app.post("/api/inquiries", async (req, res) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("inquiries")
       .insert({
         full_name: req.body.fullName || "Anonymous",
@@ -149,8 +149,7 @@ CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticate
         message: req.body.message || "No message provided",
         product_title: req.body.productTitle,
         product_sku: req.body.productSku,
-      })
-      .select();
+      });
     if (error) {
       if (error.message?.includes("relation") || error.code === "42P01") {
         return res.status(500).json({
@@ -160,7 +159,7 @@ CREATE POLICY "Admin can read inquiries" ON inquiries FOR SELECT TO authenticate
       }
       return res.status(500).json({ error: error.message });
     }
-    res.status(201).json({ success: true, id: data?.[0]?.id });
+    res.status(201).json({ success: true });
   });
 
   // AUTH

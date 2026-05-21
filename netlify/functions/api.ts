@@ -111,7 +111,7 @@ app.get("/api/inquiries", async (_req, res) => {
 });
 
 app.post("/api/inquiries", async (req, res) => {
-  const { data, error } = await supabase.from("inquiries").insert({
+  const { error } = await supabase.from("inquiries").insert({
     full_name: req.body.fullName || "Anonymous",
     email: req.body.email || "N/A",
     company: req.body.company || "N/A",
@@ -119,7 +119,7 @@ app.post("/api/inquiries", async (req, res) => {
     message: req.body.message || "No message",
     product_title: req.body.productTitle,
     product_sku: req.body.productSku,
-  }).select();
+  });
   if (error) {
     if (error.message?.includes("relation") || error.code === "42P01") {
       return res.status(500).json({
@@ -129,7 +129,7 @@ app.post("/api/inquiries", async (req, res) => {
     }
     return res.status(500).json({ error: error.message });
   }
-  res.status(201).json({ success: true, id: data?.[0]?.id });
+  res.status(201).json({ success: true });
 });
 
 // AUTH
