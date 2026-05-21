@@ -40,7 +40,7 @@ export default function AdminPanel() {
   const [image, setImage] = useState("");
   const [featured, setFeatured] = useState(false);
   const [productType, setProductType] = useState<'stock' | 'fresh'>('stock');
-  const [productTypeFilter, setProductTypeFilter] = useState<string>('all');
+  const [freshCategories] = useState(["T-Shirt", "Polo Shirt", "Tank Top", "Leggings", "Pant", "Jogger", "Hoodie", "Boxer", "Shirt", "Denim Pant", "Denim Shirt"]);
 
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [inquiryFilter, setInquiryFilter] = useState<"all" | "today" | "week">("all");
@@ -139,12 +139,14 @@ export default function AdminPanel() {
     } catch (err: any) { alert(err.message); }
   };
 
-  const filteredProducts = products.filter(p => {
+  const filterProduct = (p: Product) => {
     const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-    const matchesType = productTypeFilter === "all" || ((p as any).product_type || p.productType || "stock") === productTypeFilter;
-    return matchesSearch && matchesCategory && matchesType;
-  });
+    return matchesSearch && matchesCategory;
+  };
+
+  const freshFiltered = products.filter(p => ((p as any).product_type || p.productType || "stock") === "fresh" && filterProduct(p));
+  const stockFiltered = products.filter(p => ((p as any).product_type || p.productType || "stock") === "stock" && filterProduct(p));
 
   const recentInquiries = useMemo(() => {
     const now = new Date();
@@ -655,105 +657,162 @@ export default function AdminPanel() {
 
           {/* Products Tab */}
           {activeTab === "products" && (
-            <div className="bg-[#0a1122] border border-white/5 rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">Product Inventory</h3>
-                  <p className="text-[10px] text-slate-500 font-mono">{filteredProducts.length} products found</p>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
+            <div className="space-y-6">
+              {/* Search & Filters */}
+              <div className="bg-[#0a1122] border border-white/5 rounded-2xl p-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">Product Inventory</h3>
+                    <p className="text-[10px] text-slate-500 font-mono">{products.length} total products</p>
+                  </div>
                   <button onClick={openAddForm}
                     className="px-4 py-2 bg-gradient-to-r from-[#feae2c] to-[#ffc933] text-[#0b1329] font-display font-black text-[10px] uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#feae2c]/20 transition-all flex items-center gap-2 cursor-pointer">
                     <Plus size={14} /> Add Product
                   </button>
                 </div>
-              </div>
-
-              <div className="p-4 border-b border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="relative">
-                  <Search size={14} className="absolute left-3 top-3 text-slate-500" />
-                  <input type="text" placeholder="Search by title or SKU..." value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full text-xs font-mono bg-white/5 border border-white/10 rounded-xl pl-9 p-2.5 text-white outline-none focus:border-[#feae2c] placeholder:text-slate-600" />
-                </div>
-                <div>
-                  <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}
-                    className="w-full text-xs bg-white/5 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-[#feae2c]">
-                    <option value="All" className="bg-[#0a1122]">All Categories</option>
-                    {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#0a1122]">{cat}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <select value={productTypeFilter} onChange={e => setProductTypeFilter(e.target.value)}
-                    className="w-full text-xs bg-white/5 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-[#feae2c]">
-                    <option value="all" className="bg-[#0a1122]">All Types</option>
-                    <option value="stock" className="bg-[#0a1122]">Stock Goods</option>
-                    <option value="fresh" className="bg-[#0a1122]">Fresh Goods</option>
-                  </select>
-                </div>
-                <div className="text-right flex items-center justify-end text-xs text-slate-500 font-mono">
-                  Counter: <span className="font-bold text-[#feae2c] ml-1">{filteredProducts.length}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-3 text-slate-500" />
+                    <input type="text" placeholder="Search by title or SKU..." value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="w-full text-xs font-mono bg-white/5 border border-white/10 rounded-xl pl-9 p-2.5 text-white outline-none focus:border-[#feae2c] placeholder:text-slate-600" />
+                  </div>
+                  <div>
+                    <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}
+                      className="w-full text-xs bg-white/5 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-[#feae2c]">
+                      <option value="All" className="bg-[#0a1122]">All Categories</option>
+                      {[...CATEGORIES, ...freshCategories].map(cat => <option key={cat} value={cat} className="bg-[#0a1122]">{cat}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-mono text-xs">
-                  <thead className="bg-white/[0.02] text-slate-400 border-b border-white/5">
-                    <tr className="uppercase font-display font-bold text-[9px] tracking-wider">
-                      <th className="p-3 text-center w-10">F</th>
-                      <th className="p-3">Product</th>
-                      <th className="p-3">Category</th>
-                      <th className="p-3">Type</th>
-                      <th className="p-3 text-right">Qty</th>
-                      <th className="p-3 text-right">MOQ</th>
-                      <th className="p-3 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {filteredProducts.length === 0 ? (
-                      <tr><td colSpan={7} className="p-8 text-center text-slate-600 italic">No products found</td></tr>
-                    ) : (
-                      filteredProducts.map(p => (
-                        <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="p-3 text-center">
-                            <span className={`inline-block w-2 h-2 rounded-full ${p.featured ? "bg-[#feae2c]" : "bg-slate-600"}`} />
-                          </td>
-                          <td className="p-3">
-                            <div className="flex items-center gap-3">
-                              <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-white/5" referrerPolicy="no-referrer" />
-                              <div>
-                                <span className="text-[9px] font-mono bg-[#feae2c]/10 text-[#feae2c] px-1.5 py-0.5 rounded font-semibold">SKU #{p.sku}</span>
-                                <h4 className="font-bold text-xs text-slate-200 mt-0.5 line-clamp-1">{p.title}</h4>
+              {/* Fresh Goods Section */}
+              <div className="bg-[#0a1122] border border-emerald-500/20 rounded-2xl overflow-hidden">
+                <div className="p-4 border-b border-emerald-500/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <h4 className="font-display font-bold text-sm text-white uppercase tracking-wider">Fresh Goods</h4>
+                    <span className="bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full">{freshFiltered.length} products</span>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-mono text-xs">
+                    <thead className="bg-white/[0.02] text-slate-400 border-b border-white/5">
+                      <tr className="uppercase font-display font-bold text-[9px] tracking-wider">
+                        <th className="p-3 text-center w-10">F</th>
+                        <th className="p-3">Product</th>
+                        <th className="p-3">Category</th>
+                        <th className="p-3 text-right">Qty</th>
+                        <th className="p-3 text-right">MOQ</th>
+                        <th className="p-3 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {freshFiltered.length === 0 ? (
+                        <tr><td colSpan={6} className="p-8 text-center text-slate-600 italic">No fresh products found</td></tr>
+                      ) : (
+                        freshFiltered.map(p => (
+                          <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="p-3 text-center">
+                              <span className={`inline-block w-2 h-2 rounded-full ${p.featured ? "bg-[#feae2c]" : "bg-slate-600"}`} />
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-3">
+                                <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-white/5" referrerPolicy="no-referrer" />
+                                <div>
+                                  <span className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-semibold">SKU #{p.sku}</span>
+                                  <h4 className="font-bold text-xs text-slate-200 mt-0.5 line-clamp-1">{p.title}</h4>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <span className="bg-white/5 text-slate-300 font-bold uppercase text-[9px] px-2 py-1 rounded-lg">{p.category}</span>
-                          </td>
-                          <td className="p-3">
-                            <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-lg ${((p as any).product_type || p.productType || "stock") === "fresh" ? "bg-emerald-500/10 text-emerald-400" : "bg-[#feae2c]/10 text-[#feae2c]"}`}>
-                              {((p as any).product_type || p.productType || "stock") === "fresh" ? "Fresh" : "Stock"}
-                            </span>
-                          </td>
-                          <td className="p-3 text-right font-bold text-emerald-400">{p.qty.toLocaleString()}</td>
-                          <td className="p-3 text-right text-slate-400">{p.moq.toLocaleString()}</td>
-                          <td className="p-3">
-                            <div className="flex items-center justify-center gap-1">
-                              <button onClick={() => openEditForm(p)}
-                                className="p-1.5 px-2.5 hover:bg-white/5 border border-white/10 text-slate-400 hover:text-white rounded-lg transition-all cursor-pointer">
-                                <Edit2 size={12} />
-                              </button>
-                              <button onClick={() => handleDeleteProduct(p.id)}
-                                className="p-1.5 px-2.5 hover:bg-red-500/10 border border-white/10 text-red-400 hover:text-red-300 rounded-lg transition-all cursor-pointer">
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                            </td>
+                            <td className="p-3">
+                              <span className="bg-white/5 text-slate-300 font-bold uppercase text-[9px] px-2 py-1 rounded-lg">{p.category}</span>
+                            </td>
+                            <td className="p-3 text-right font-bold text-emerald-400">{p.qty.toLocaleString()}</td>
+                            <td className="p-3 text-right text-slate-400">{p.moq.toLocaleString()}</td>
+                            <td className="p-3">
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => openEditForm(p)}
+                                  className="p-1.5 px-2.5 hover:bg-white/5 border border-white/10 text-slate-400 hover:text-white rounded-lg transition-all cursor-pointer">
+                                  <Edit2 size={12} />
+                                </button>
+                                <button onClick={() => handleDeleteProduct(p.id)}
+                                  className="p-1.5 px-2.5 hover:bg-red-500/10 border border-white/10 text-red-400 hover:text-red-300 rounded-lg transition-all cursor-pointer">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Stock Goods Section */}
+              <div className="bg-[#0a1122] border border-[#feae2c]/20 rounded-2xl overflow-hidden">
+                <div className="p-4 border-b border-[#feae2c]/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#feae2c]"></span>
+                    <h4 className="font-display font-bold text-sm text-white uppercase tracking-wider">Stock Goods</h4>
+                    <span className="bg-[#feae2c]/10 text-[#feae2c] text-[9px] font-bold px-2 py-0.5 rounded-full">{stockFiltered.length} products</span>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-mono text-xs">
+                    <thead className="bg-white/[0.02] text-slate-400 border-b border-white/5">
+                      <tr className="uppercase font-display font-bold text-[9px] tracking-wider">
+                        <th className="p-3 text-center w-10">F</th>
+                        <th className="p-3">Product</th>
+                        <th className="p-3">Category</th>
+                        <th className="p-3 text-right">Qty</th>
+                        <th className="p-3 text-right">MOQ</th>
+                        <th className="p-3 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {stockFiltered.length === 0 ? (
+                        <tr><td colSpan={6} className="p-8 text-center text-slate-600 italic">No stock products found</td></tr>
+                      ) : (
+                        stockFiltered.map(p => (
+                          <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="p-3 text-center">
+                              <span className={`inline-block w-2 h-2 rounded-full ${p.featured ? "bg-[#feae2c]" : "bg-slate-600"}`} />
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-3">
+                                <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-white/5" referrerPolicy="no-referrer" />
+                                <div>
+                                  <span className="text-[9px] font-mono bg-[#feae2c]/10 text-[#feae2c] px-1.5 py-0.5 rounded font-semibold">SKU #{p.sku}</span>
+                                  <h4 className="font-bold text-xs text-slate-200 mt-0.5 line-clamp-1">{p.title}</h4>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <span className="bg-white/5 text-slate-300 font-bold uppercase text-[9px] px-2 py-1 rounded-lg">{p.category}</span>
+                            </td>
+                            <td className="p-3 text-right font-bold text-emerald-400">{p.qty.toLocaleString()}</td>
+                            <td className="p-3 text-right text-slate-400">{p.moq.toLocaleString()}</td>
+                            <td className="p-3">
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => openEditForm(p)}
+                                  className="p-1.5 px-2.5 hover:bg-white/5 border border-white/10 text-slate-400 hover:text-white rounded-lg transition-all cursor-pointer">
+                                  <Edit2 size={12} />
+                                </button>
+                                <button onClick={() => handleDeleteProduct(p.id)}
+                                  className="p-1.5 px-2.5 hover:bg-red-500/10 border border-white/10 text-red-400 hover:text-red-300 rounded-lg transition-all cursor-pointer">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
