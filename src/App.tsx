@@ -993,58 +993,76 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             </>
           )}
 
-          {/* Active Inventory Listing Section with dynamic search and counters */}
-          <section id="products" className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12 space-y-4 flex-1">
-            <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-5 space-y-4">
-              <div className="flex flex-col gap-3">
-                <div>
-                  <h3 className="font-display font-black text-base sm:text-lg text-primary uppercase">
-                    {mode === "fresh" ? "Available Fresh Goods" : "Available Stock Lots"}
-                  </h3>
-                  <p className="text-[11px] text-slate-500">{filteredProducts.length} products</p>
-                </div>
-                <div className="flex flex-col xs:flex-row gap-2 w-full">
-                  <button
-                    type="button"
-                    onClick={() => navigateTo("/products")}
-                    className="bg-[#0b1329] hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-3 py-2 rounded-lg shrink-0 flex items-center justify-center gap-1.5"
-                  >
-                    <Package size={11} className="text-[#feae2c]" />
-                    <span>All</span>
-                  </button>
-                  <div className="relative min-w-0">
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-[#f8fafc] border border-slate-300 rounded-lg py-2 pl-9 pr-10 text-xs outline-none focus:border-primary shadow-sm"
-                    />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</div>
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Categories Filter */}
-            {renderCategoryFilterHeader()}
-
-            {/* Render loading or loaded dynamic grid */}
+          {/* Category-based slidable product rows */}
+          <section id="products" className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12 space-y-8 flex-1">
             {loading ? (
               <div className="p-20 text-center space-y-3">
                 <div className="w-8 h-8 border-4 border-t-transparent border-primary rounded-full animate-spin mx-auto"></div>
                 <p className="text-xs font-mono text-slate-500">Retrieving cargo catalogs...</p>
               </div>
             ) : (
-              renderProductGrid(filteredProducts)
+              (() => {
+                const grouped: Record<string, Product[]> = {};
+                filteredProducts.forEach(p => {
+                  if (!grouped[p.category]) grouped[p.category] = [];
+                  grouped[p.category].push(p);
+                });
+                return Object.entries(grouped).map(([cat, catProducts]) => (
+                  <div key={cat}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <h3 className="font-display font-black text-sm sm:text-base uppercase text-[#0b1329]">{cat}</h3>
+                      <span className="bg-[#0b1329]/10 text-[#0b1329] font-mono text-[9px] px-2 py-0.5 rounded font-bold">{catProducts.length}</span>
+                      <button
+                        onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/category/${encodeURIComponent(cat)}`)}
+                        className="ml-auto text-[10px] text-[#feae2c] hover:text-[#feae2c]/80 font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                      >
+                        View All <ChevronRight size={12} />
+                      </button>
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none -mx-3 px-3">
+                      {catProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
+                          className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative"
+                        >
+                          <img src={p.image} alt={p.title}
+                            className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer" loading="lazy" />
+                          <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
+                            {p.category}
+                          </span>
+                          <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
+                            #{p.sku}
+                          </div>
+                          <div className="p-2.5 sm:p-3 space-y-1.5">
+                            <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                              {p.title}
+                            </h4>
+                            <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
+                              <span className="bg-[#0b1329]/10 text-[#0b1329] px-1.5 py-0.5 rounded font-semibold">{p.category}</span>
+                              <span className="text-slate-400">#{p.sku}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
+                              <div>
+                                <span className="text-[7px] text-slate-400 uppercase">Ready</span>
+                                <p className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</p>
+                              </div>
+                              <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
+                              className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
+                            >
+                              Inquire Now
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()
             )}
 
             {/* Divider line */}
