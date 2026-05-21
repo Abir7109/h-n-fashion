@@ -2,9 +2,13 @@ import express from "express";
 import serverless from "serverless-http";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Debug endpoint
+const dbgUrl = supabaseUrl ? "set" : "NOT SET";
+const dbgKey = supabaseAnonKey ? "set" : "NOT SET";
 
 const app = express();
 app.use(express.json());
