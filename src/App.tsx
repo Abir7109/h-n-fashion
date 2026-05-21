@@ -169,6 +169,7 @@ export default function App() {
     setProducts((localProducts as Product[]).filter(
       p => (p.productType || "stock") === mode
     ));
+    fetchRecommendations(mode).then(setRecommendedProducts);
     setLoading(false);
   };
 

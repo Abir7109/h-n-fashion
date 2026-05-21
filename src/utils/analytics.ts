@@ -27,13 +27,19 @@ export function trackProductView(productId: string, category: string) {
   trackEvent("productview", { productId, category, path: window.location.pathname });
 }
 
+import localProducts from "../data/products.json";
+
 export async function fetchRecommendations(type?: string): Promise<any[]> {
   try {
     const visitorId = getVisitorId();
     const res = await fetch(`/api/analytics/recommendations?visitorId=${encodeURIComponent(visitorId)}${type ? `&type=${type}` : ""}`);
-    if (res.ok) return await res.json();
-    return [];
-  } catch { return []; }
+    if (res.ok) {
+      const data = await res.json();
+      if (data.length > 0) return data;
+    }
+  } catch {}
+  // Fallback to local products when API returns nothing
+  return (localProducts as any[]).filter(p => (p.productType || "stock") === (type || "stock")).slice(0, 8);
 }
 
 export { getVisitorId };

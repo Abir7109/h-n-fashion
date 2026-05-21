@@ -17,7 +17,12 @@ app.get("/api/debug", (_req, res) => {
 // PRODUCTS
 app.get("/api/products", async (req, res) => {
   try {
-    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    const type = req.query.type as string;
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+    if (type === "fresh" || type === "stock") {
+      query = query.eq("product_type", type);
+    }
+    const { data, error } = await query;
     if (error) {
       return res.status(500).json({ error: error.message, code: error.code, details: error.details, hint: error.hint });
     }
