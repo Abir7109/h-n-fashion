@@ -5,7 +5,7 @@ import {
   ArrowLeft, FileText, Check, Award, Compass, Truck, ChevronLeft, X, Maximize2, ZoomIn,
   Menu, FileCheck, CreditCard, Anchor, TrendingUp
 } from "lucide-react";
-import { Product, CATEGORIES } from "./types";
+import { Product, CATEGORIES, FRESH_CATEGORIES } from "./types";
 import InquiryModal from "./components/InquiryModal";
 import ManifestModal from "./components/ManifestModal";
 import AdminPanel from "./components/AdminPanel";
@@ -35,21 +35,32 @@ export default function App() {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
+  // Detect mode from path
+  const getMode = (): 'stock' | 'fresh' => {
+    return currentPath.startsWith("/fresh-goods") ? "fresh" : "stock";
+  };
+  const mode = getMode();
+
+  // Clean path for routing by stripping mode prefix
+  const cleanPath = currentPath.startsWith("/fresh-goods")
+    ? currentPath.replace("/fresh-goods", "") || "/"
+    : currentPath;
+
   // Helper to parse dynamic URLs
   const getRouteParams = () => {
-    if (currentPath.startsWith("/product/")) {
-      return { route: "product", id: currentPath.substring("/product/".length) };
+    if (cleanPath.startsWith("/product/")) {
+      return { route: "product", id: cleanPath.substring("/product/".length) };
     }
-    if (currentPath.startsWith("/category/")) {
-      return { route: "category", slug: decodeURIComponent(currentPath.substring("/category/".length)) };
+    if (cleanPath.startsWith("/category/")) {
+      return { route: "category", slug: decodeURIComponent(cleanPath.substring("/category/".length)) };
     }
-    if (currentPath.startsWith("/admin")) {
+    if (cleanPath.startsWith("/admin")) {
       return { route: "admin" };
     }
-    if (currentPath === "/products" || currentPath === "/all-products") {
+    if (cleanPath === "/products" || cleanPath === "/all-products") {
       return { route: "products" };
     }
-    if (currentPath === "/about" || currentPath === "/about-us") {
+    if (cleanPath === "/about" || cleanPath === "/about-us") {
       return { route: "about" };
     }
     return { route: "home" };
@@ -127,7 +138,8 @@ export default function App() {
     if (scrollTo === "products" || scrollTo === "inquiry") {
       setTimeout(() => {
         document.getElementById(scrollTo)?.scrollIntoView({ behavior: "smooth" });
-        window.history.replaceState({}, "", "/");
+        const base = mode === "fresh" ? "/fresh-goods" : "/";
+        window.history.replaceState({}, "", base);
       }, 300);
     }
   }, [currentPath]);
@@ -135,7 +147,7 @@ export default function App() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/products");
+      const response = await fetch(`/api/products?type=${mode}`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -146,7 +158,10 @@ export default function App() {
     } catch (err) {
       console.error("Communications error fetching products", err);
     }
-    setProducts(localProducts as Product[]);
+    const localFiltered = (localProducts as Product[]).filter(
+      p => (p.productType || "stock") === mode
+    );
+    setProducts(localFiltered.length > 0 ? localFiltered : localProducts as Product[]);
     setLoading(false);
   };
 
@@ -264,9 +279,10 @@ export default function App() {
 
   // Render Virtual Manifest Certification Downloader
   const downloadCertifiedSpecs = (product: Product) => {
+    const portalName = mode === "fresh" ? "H&N FRESH GOODS" : "STOCKLOT BD";
     const content = `
 ========================================
-    STOCKLOT BD - EXPORT SPECIFICATION CERTIFICATE
+    ${portalName} - EXPORT SPECIFICATION CERTIFICATE
 ========================================
 Product Title       : ${product.title}
 SKU Reference Code  : #${product.sku}
@@ -306,46 +322,113 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
     const mainImage = prod.image;
     const category = (prod.category || "").toLowerCase();
     
-    // High-fidelity specific alternate photos matching the products exactly
-    const alternates: { [key: string]: string[] } = {
+    if (mode === "fresh") {
+      const freshAlternates: { [key: string]: string[] } = {
+        "t-shirt": [
+          "https://images.unsplash.com/photo-1556301249-1cdb8e5e2e1a?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1586771109-1c5b7b9c9f7e?auto=format&fit=crop&q=80&w=800",
+        ],
+        "polo shirt": [
+          "https://images.unsplash.com/photo-1594930329750-e7d5dc5e7b3e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1589310240389-fc6e8aa8e158?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=800",
+        ],
+        "tank top": [
+          "https://images.unsplash.com/photo-1582412466850-1e029f9c56e0?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
+        ],
+        "leggings": [
+          "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1598254781-6b9c6b4f7b2e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+        ],
+        "pant": [
+          "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1598550472066-76fb1fa2b6eb?auto=format&fit=crop&q=80&w=800",
+        ],
+        "jogger": [
+          "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1586771109-1c5b7b9c9f7e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800",
+        ],
+        "hoodie": [
+          "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1503341504253-d6123f1c1c1e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1600134950351-5e8fd22927d1?auto=format&fit=crop&q=80&w=800",
+        ],
+        "boxer": [
+          "https://images.unsplash.com/photo-1589310240389-fc6e8aa8e158?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1578940443562-d5061c00f4b9?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1608236451172-3d9cf7f78dc2?auto=format&fit=crop&q=80&w=800",
+        ],
+        "shirt": [
+          "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1544027993-37d0750ab5c2?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1598254781-6b9c6b4f7b2e?auto=format&fit=crop&q=80&w=800",
+        ],
+        "denim pant": [
+          "https://images.unsplash.com/photo-1565084888279-3b9bb2f7a5f1?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+        ],
+        "denim shirt": [
+          "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1600134950351-5e8fd22927d1?auto=format&fit=crop&q=80&w=800",
+          "https://images.unsplash.com/photo-1598550472066-76fb1fa2b6eb?auto=format&fit=crop&q=80&w=800",
+        ],
+      };
+      const alt = freshAlternates[category] || [
+        "https://images.unsplash.com/photo-1556301249-1cdb8e5e2e1a?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1596728561-5a5f7b8b2c3d?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1617126801-5b8b8c7f2d3e?auto=format&fit=crop&q=80&w=800",
+      ];
+      const mainZoom = `${mainImage.split("?")[0]}?auto=format&fit=crop&q=80&w=800&rect=100,100,600,600`;
+      return [mainImage, alt[0], alt[1], alt[2] || mainZoom];
+    }
+
+    // Stock mode alternates (completely different images from fresh)
+    const stockAlternates: { [key: string]: string[] } = {
       "t-shirts": [
-        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800", // folded in warehouse
-        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=800", // wearing t-shirt
-        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=800", // t-shirt close up
+        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=800",
       ],
       "intimates": [
-        "https://images.unsplash.com/photo-1616606103915-dea7be788566?auto=format&fit=crop&q=80&w=800", // lace detail
-        "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&q=80&w=800", // folded sets
-        "https://images.unsplash.com/photo-1562572159-4ebcd318f4dd?auto=format&fit=crop&q=80&w=800", // hanger display
+        "https://images.unsplash.com/photo-1616606103915-dea7be788566?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1562572159-4ebcd318f4dd?auto=format&fit=crop&q=80&w=800",
       ],
       "denim": [
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800", // folded jeans stack
-        "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=800", // back pocket label
-        "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=800", // pocket rivets
+        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=800",
       ],
       "shirts": [
-        "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=800", // rolled sleeves close-up
-        "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&q=80&w=800", // stacked clothes table
-        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800", // shipping cargo
+        "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
       ],
       "kids wear": [
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800", // cozy pile child clothes
-        "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=800", // dynamic kids selection
-        "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&q=80&w=400", // detail seam
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&q=80&w=400",
       ],
       "activewear": [
-        "https://images.unsplash.com/photo-1483721310020-03333e577078?auto=format&fit=crop&q=80&w=800", // active lifestyle
-        "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=800", // sports layout
-        "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=800", // boxes
+        "https://images.unsplash.com/photo-1483721310020-03333e577078?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=800",
       ],
       "outerwear": [
-        "https://images.unsplash.com/photo-1544923246-77307dd654cb?auto=format&fit=crop&q=80&w=800", // zipper
-        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800", // weave
-        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800", // shipping
+        "https://images.unsplash.com/photo-1544923246-77307dd654cb?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
       ]
     };
 
-    const selectedCategoryAlts = alternates[category] || [
+    const alt = stockAlternates[category] || [
       "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
       "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=800",
       "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&q=80&w=800",
@@ -355,9 +438,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
 
     return [
       mainImage,
-      selectedCategoryAlts[0] || "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
-      selectedCategoryAlts[1] || "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=800",
-      selectedCategoryAlts[2] || mainZoom
+      alt[0] || "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
+      alt[1] || "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=800",
+      alt[2] || mainZoom
     ];
   };
 
@@ -418,6 +501,43 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
   // Category specific SEO details mapper
   const getCategorySEO = (catSlug: string) => {
     const clean = catSlug.toLowerCase();
+    const isFresh = mode === "fresh";
+    if (isFresh) {
+      const freshSEO: Record<string, { heading: string; keywords: string; description: string }> = {
+        "t-shirt": {
+          heading: "Bangladesh Wholesale Fresh T-Shirts — Factory Direct Ready Apparel",
+          keywords: "wholesale fresh t shirts Bangladesh, factory direct t shirts supplier Bangladesh, ready to ship t shirts Bangladesh",
+          description: "Source premium fresh t-shirts direct from Bangladesh factories. Brand new, export quality, ready to ship. Wholesale pricing for bulk buyers and global retailers."
+        },
+        "polo shirt": {
+          heading: "Wholesale Fresh Polo Shirts Bangladesh — Bulk Ready Apparel",
+          keywords: "wholesale fresh polo shirts Bangladesh, ready to ship polo shirts exporter, Bangladesh fresh apparel supplier",
+          description: "Premium quality fresh polo shirts direct from Bangladesh garment factories. Pique cotton, branded quality, ready for immediate shipping at wholesale prices."
+        },
+        "hoodie": {
+          heading: "Bulk Fresh Hoodies Bangladesh — Factory Direct Wholesale Supplier",
+          keywords: "fresh hoodies Bangladesh wholesale, factory direct hoodies supplier, ready to ship hoodies bulk",
+          description: "Brand new fleece hoodies and sweatshirts direct from Bangladesh factories. Heavy cotton-poly fleece, available in bulk for global apparel buyers."
+        },
+        "leggings": {
+          heading: "Wholesale Fresh Leggings Bangladesh — Nylon Spandex Ready Stock",
+          keywords: "fresh leggings Bangladesh wholesale, nylon spandex leggings supplier Bangladesh, ready to ship activewear Bangladesh",
+          description: "Factory fresh leggings in nylon-spandex blends. Export quality, available in multiple sizes and colors. Bulk orders ready for immediate dispatch from Dhaka."
+        },
+        "denim": {
+          heading: "Fresh Denim Jeans & Shirts Bangladesh — Wholesale Ready Stock",
+          keywords: "fresh denim Bangladesh wholesale, ready to ship denim jeans Bangladesh, bulk denim shirts supplier Bangladesh",
+          description: "Brand new denim jeans and denim shirts direct from Bangladesh's top garment factories. Pure cotton denim, export quality, ready to ship."
+        }
+      };
+      const matched = freshSEO[clean] || {
+        heading: `Fresh ${catSlug} Bangladesh — Wholesale Ready Apparel Supplier`,
+        keywords: `fresh ${catSlug} Bangladesh wholesale, ready to ship ${catSlug} Bangladesh, Bangladesh fresh apparel exporter`,
+        description: `Brand new, export quality ${catSlug} ready for bulk shipping from Bangladesh. Factory fresh stock, wholesale prices, immediate dispatch from Dhaka.`
+      };
+      return matched;
+    }
+    // Stock SEO (original)
     if (clean.includes("denim")) {
       return {
         heading: "Bangladesh's Direct Overstock Denim Sourcing Gateway",
@@ -444,15 +564,17 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
     };
   };
 
-  // Reusable Category Navigation filter header (includes "🏠 Home" as requested!)
+  // Reusable Category Navigation filter header
   const renderCategoryFilterHeader = () => {
+    const categories = mode === "fresh" ? FRESH_CATEGORIES : CATEGORIES;
+    const homeLink = mode === "fresh" ? "/fresh-goods" : "/";
     return (
       <div className="flex flex-col gap-3 border-b border-slate-200 pb-4">
         <div className="flex flex-wrap gap-1.5 items-center -mx-1 px-1">
           <button
             onClick={() => {
               setSelectedCategory("All");
-              navigateTo("/");
+              navigateTo(homeLink);
             }}
             className={`px-2.5 py-1.5 rounded text-[10px] font-bold uppercase transition-all flex items-center gap-1 shrink-0 ${
               routeParams.route === "home" && selectedCategory === "All"
@@ -460,19 +582,22 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
             }`}
           >
-            Home ({products.length})
+            {mode === "fresh" ? "Fresh" : "Home"} ({products.length})
           </button>
           
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const count = products.filter((p) => p.category === cat).length;
             const isCatActive = routeParams.route === "category" && routeParams.slug?.toLowerCase() === cat.toLowerCase();
+            const catLink = mode === "fresh"
+              ? `/fresh-goods/category/${encodeURIComponent(cat)}`
+              : `/category/${encodeURIComponent(cat)}`;
             return (
               <button
                 type="button"
                 key={cat}
                 onClick={() => {
                   setSelectedCategory(cat);
-                  navigateTo(`/category/${encodeURIComponent(cat)}`);
+                  navigateTo(catLink);
                 }}
                 className={`px-2.5 py-1.5 rounded text-[10px] font-semibold uppercase cursor-pointer transition-all shrink-0 ${
                   isCatActive
@@ -503,7 +628,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         {items.map((p) => (
           <div
             key={p.id}
-            onClick={() => navigateTo(`/product/${p.id}`)}
+            onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`)}
             className="group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
           >
             {/* Image Wrapper */}
@@ -550,7 +675,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigateTo(`/product/${p.id}`);
+                  navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`);
                 }}
                 className="w-full py-2 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[10px] sm:text-xs uppercase tracking-wide rounded transition-all mt-2"
               >
@@ -577,7 +702,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         </div>
       )}
 
-      {/* Primary Top Bar (Admin Buttons cleanly removed!) */}
+      {/* Primary Top Bar */}
       <nav id="navbar" className="bg-[#0b1329] text-white border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigateTo("/")}>
@@ -606,20 +731,35 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 <span className="bg-[#feae2c] text-indigo-950 text-[7px] sm:text-[8px] font-black px-1 sm:px-1.5 py-0.5 rounded-full font-mono">B2B</span>
               </h1>
               <p className="text-[9px] sm:text-[10px] text-slate-400 font-mono tracking-wider">
-                BANGLADESH DIRECT SURPLUS PORTAL
+                {mode === "fresh" ? "Bangladesh Wholesale Fresh Apparel Exporter — Factory Direct Ready Garments Supplier" : "BANGLADESH DIRECT SURPLUS PORTAL"}
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300 whitespace-nowrap">
+          <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-300 whitespace-nowrap">
+            {/* Mode Tabs */}
+            <span 
+              onClick={() => navigateTo("/")}
+              className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
+                mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
+              }`}
+            >
+              Stock Goods
+            </span>
+            <span 
+              onClick={() => navigateTo("/fresh-goods")}
+              className={`px-3 py-1.5 rounded transition-colors uppercase tracking-wider shrink-0 cursor-pointer font-bold ${
+                mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "text-slate-300 hover:text-[#feae2c]"
+              }`}
+            >
+              Fresh Goods
+            </span>
+            <span className="text-slate-600 mx-1">|</span>
             <span 
               onClick={() => {
-                if (routeParams.route !== "home") {
-                  navigateTo("/?scroll=products");
-                } else {
-                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
-                }
+                const productsLink = mode === "fresh" ? "/fresh-goods/products" : "/products";
+                navigateTo(productsLink);
               }}
               className="hover:text-[#feae2c] transition-colors uppercase tracking-wider shrink-0 cursor-pointer"
             >
@@ -634,7 +774,8 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             <span 
               onClick={() => {
                 if (routeParams.route !== "home") {
-                  navigateTo("/?scroll=inquiry");
+                  const inquiryLink = mode === "fresh" ? "/fresh-goods?scroll=inquiry" : "/?scroll=inquiry";
+                  navigateTo(inquiryLink);
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
                 }
@@ -659,14 +800,30 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#0a1122] border-t border-white/5 px-4 py-4 space-y-3 animate-fadeIn">
+            {/* Mode Tabs for mobile */}
+            <div className="flex gap-2 pb-2 border-b border-white/5">
+              <span 
+                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/"); }}
+                className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                  mode === "stock" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
+                }`}
+              >
+                Stock Goods
+              </span>
+              <span 
+                onClick={() => { setIsMobileMenuOpen(false); navigateTo("/fresh-goods"); }}
+                className={`flex-1 text-center py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                  mode === "fresh" ? "bg-[#feae2c] text-indigo-950" : "bg-white/10 text-slate-300"
+                }`}
+              >
+                Fresh Goods
+              </span>
+            </div>
             <span 
               onClick={() => { 
                 setIsMobileMenuOpen(false);
-                if (routeParams.route !== "home") {
-                  navigateTo("/?scroll=products");
-                } else {
-                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
-                }
+                const productsLink = mode === "fresh" ? "/fresh-goods/products" : "/products";
+                navigateTo(productsLink);
               }}
               className="block py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-[#feae2c] cursor-pointer transition-all"
             >
@@ -682,7 +839,8 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               onClick={() => { 
                 setIsMobileMenuOpen(false);
                 if (routeParams.route !== "home") {
-                  navigateTo("/?scroll=inquiry");
+                  const inquiryLink = mode === "fresh" ? "/fresh-goods?scroll=inquiry" : "/?scroll=inquiry";
+                  navigateTo(inquiryLink);
                 } else {
                   document.getElementById("inquiry")?.scrollIntoView({ behavior: "smooth" });
                 }
@@ -698,68 +856,137 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
       {/* Main Body Router Resolver */}
       {routeParams.route === "home" && (
         <>
-{/* Product-Focused Hero */}
-          <section className="bg-gradient-to-r from-[#0b1329] to-[#1a2744] text-white py-6 sm:py-10 px-4 border-b-4 border-[#feae2c]">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
-                <div className="flex-1 text-center lg:text-left space-y-3">
-                  <h2 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl text-white tracking-tight">
-                    Stock Lot Garments <span className="text-[#feae2c]">From Bangladesh</span>
-                  </h2>
-                  <p className="text-slate-300 text-sm">
-                    T-shirts, jeans, intimates, kids wear at wholesale prices. Verified AQL quality.
-                  </p>
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
-                    <a
-                      href="#products"
-                      className="bg-[#feae2c] hover:bg-[#ffc933] text-slate-950 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider shadow-lg transition-colors flex items-center gap-2"
-                    >
-                      Browse Products
-                      <ChevronRight size={14} />
-                    </a>
-                    <a
-                      href="#inquiry"
-                      className="bg-white/10 hover:bg-white/15 text-white border border-white/20 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider transition-colors"
-                    >
-                      Get Quote
-                    </a>
+          {mode === "fresh" ? (
+            <>
+              {/* Fresh Goods Hero */}
+              <section className="bg-gradient-to-r from-[#0b1329] to-[#1a2744] text-white py-6 sm:py-10 px-4 border-b-4 border-[#feae2c]">
+                <div className="max-w-7xl mx-auto">
+                  <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+                    <div className="flex-1 text-center lg:text-left space-y-3">
+                      <h2 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl text-white tracking-tight">
+                        Fresh Ready Clothes <span className="text-[#feae2c]">From Bangladesh</span>
+                      </h2>
+                      <p className="text-slate-300 text-sm">
+                        T-shirts, polos, hoodies, leggings — brand new, factory fresh, ready to ship at wholesale prices.
+                      </p>
+                      <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
+                        <a
+                          href="#products"
+                          className="bg-[#feae2c] hover:bg-[#ffc933] text-slate-950 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider shadow-lg transition-colors flex items-center gap-2"
+                        >
+                          Browse Products
+                          <ChevronRight size={14} />
+                        </a>
+                        <a
+                          href="#inquiry"
+                          className="bg-white/10 hover:bg-white/15 text-white border border-white/20 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider transition-colors"
+                        >
+                          Get Quote
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 flex-wrap justify-center">
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-[#feae2c]">{products.length}</span>
+                        <p className="text-[10px] text-slate-400 mt-1">Items</p>
+                      </div>
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-[#feae2c]">
+                          {(products.reduce((acc, p) => acc + p.qty, 0) / 1000).toFixed(0)}K
+                        </span>
+                        <p className="text-[10px] text-slate-400 mt-1">Total Pcs</p>
+                      </div>
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-emerald-400">AQL 1.5</span>
+                        <p className="text-[10px] text-slate-400 mt-1">Verified</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-4 flex-wrap justify-center">
-                  <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
-                    <span className="text-2xl font-black text-[#feae2c]">{products.length}</span>
-                    <p className="text-[10px] text-slate-400 mt-1">Active Lots</p>
-                  </div>
-                  <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
-                    <span className="text-2xl font-black text-[#feae2c]">
-                      {(products.reduce((acc, p) => acc + p.qty, 0) / 1000).toFixed(0)}K
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-1">Total Pcs</p>
-                  </div>
-                  <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
-                    <span className="text-2xl font-black text-emerald-400">AQL 1.5</span>
-                    <p className="text-[10px] text-slate-400 mt-1">Verified</p>
-                  </div>
+              </section>
+
+              {/* Fresh Ticker Bar */}
+              <div className="bg-slate-900 border-y border-slate-800 py-3 overflow-hidden flex items-center">
+                <div className="ticker-scroll">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-8 whitespace-nowrap text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">
+                      <span className="text-[#feae2c]">● Factory Fresh Stock Ready</span>
+                      <span>• BRAND NEW GARMENTS — READY TO SHIP</span>
+                      <span className="text-[#feae2c]">• CERTIFIED EXPORT QUALITY APPAREL</span>
+                      <span>• T-SHIRTS • POLOS • HOODIES • LEGGINGS</span>
+                      <span>• SHIP DIRECT FROM CHITTAGONG SEA PORT</span>
+                      <span>• BANGLADESH WHOLESALE FRESH APPAREL EXPORTER</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          </section>
-
-          {/* Marquee Moving Ticker Bar */}
-          <div className="bg-slate-900 border-y border-slate-800 py-3 overflow-hidden flex items-center">
-            <div className="ticker-scroll">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-center gap-8 whitespace-nowrap text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">
-                  <span className="text-[#feae2c]">● Live Dhaka Allocations Loaded</span>
-                  <span>• VERIFIED AQL 1.5 LOGISTICS PROTOCOLS</span>
-                  <span className="text-[#feae2c]">• EXPORT PACKING COMPLIANT</span>
-                  <span>• BRANDED DENIM & COTTON T-SHIRTS LIVE</span>
-                  <span>• SHIP DIRECT FROM CHITTAGONG SEA PORT</span>
-                  <span>• CERTIFICATES SGS VERIFIED EXCLUDING FACTORY REJECT</span>
+            </>
+          ) : (
+            <>
+              {/* Stock Goods Hero */}
+              <section className="bg-gradient-to-r from-[#0b1329] to-[#1a2744] text-white py-6 sm:py-10 px-4 border-b-4 border-[#feae2c]">
+                <div className="max-w-7xl mx-auto">
+                  <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+                    <div className="flex-1 text-center lg:text-left space-y-3">
+                      <h2 className="font-display font-black text-2xl xs:text-3xl sm:text-4xl text-white tracking-tight">
+                        Stock Lot Garments <span className="text-[#feae2c]">From Bangladesh</span>
+                      </h2>
+                      <p className="text-slate-300 text-sm">
+                        T-shirts, jeans, intimates, kids wear at wholesale prices. Verified AQL quality.
+                      </p>
+                      <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
+                        <a
+                          href="#products"
+                          className="bg-[#feae2c] hover:bg-[#ffc933] text-slate-950 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider shadow-lg transition-colors flex items-center gap-2"
+                        >
+                          Browse Products
+                          <ChevronRight size={14} />
+                        </a>
+                        <a
+                          href="#inquiry"
+                          className="bg-white/10 hover:bg-white/15 text-white border border-white/20 font-bold px-5 py-2.5 rounded text-xs uppercase tracking-wider transition-colors"
+                        >
+                          Get Quote
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 flex-wrap justify-center">
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-[#feae2c]">{products.length}</span>
+                        <p className="text-[10px] text-slate-400 mt-1">Active Lots</p>
+                      </div>
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-[#feae2c]">
+                          {(products.reduce((acc, p) => acc + p.qty, 0) / 1000).toFixed(0)}K
+                        </span>
+                        <p className="text-[10px] text-slate-400 mt-1">Total Pcs</p>
+                      </div>
+                      <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
+                        <span className="text-2xl font-black text-emerald-400">AQL 1.5</span>
+                        <p className="text-[10px] text-slate-400 mt-1">Verified</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </section>
+
+              {/* Stock Ticker Bar */}
+              <div className="bg-slate-900 border-y border-slate-800 py-3 overflow-hidden flex items-center">
+                <div className="ticker-scroll">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-8 whitespace-nowrap text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">
+                      <span className="text-[#feae2c]">● Live Dhaka Allocations Loaded</span>
+                      <span>• VERIFIED AQL 1.5 LOGISTICS PROTOCOLS</span>
+                      <span className="text-[#feae2c]">• EXPORT PACKING COMPLIANT</span>
+                      <span>• BRANDED DENIM & COTTON T-SHIRTS LIVE</span>
+                      <span>• SHIP DIRECT FROM CHITTAGONG SEA PORT</span>
+                      <span>• CERTIFICATES SGS VERIFIED EXCLUDING FACTORY REJECT</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Active Inventory Listing Section with dynamic search and counters */}
           <section id="products" className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12 space-y-4 flex-1">
@@ -767,7 +994,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <div className="flex flex-col gap-3">
                 <div>
                   <h3 className="font-display font-black text-base sm:text-lg text-primary uppercase">
-                    Available Stock Lots
+                    {mode === "fresh" ? "Available Fresh Goods" : "Available Stock Lots"}
                   </h3>
                   <p className="text-[11px] text-slate-500">{filteredProducts.length} products</p>
                 </div>
@@ -830,7 +1057,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   {recommendedProducts.map((p) => (
                     <div
                       key={p.id}
-                      onClick={() => navigateTo(`/product/${p.id}`)}
+                      onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`)}
                       className="snap-start shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
                     >
                       <div className="relative bg-slate-100 h-36 xs:h-40 sm:h-44 overflow-hidden">
@@ -865,7 +1092,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                           <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); navigateTo(`/product/${p.id}`); }}
+                          onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/product/${p.id}`); }}
                           className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
                         >
                           Inquire Now
@@ -1044,9 +1271,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         <div className="flex-1 max-w-7xl mx-auto px-2.5 xs:px-4 py-8 space-y-8 w-full animate-fadeIn">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo("/")}>Home</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
             <span>/</span>
-            <span className="font-bold text-slate-800">All Products Catalog</span>
+            <span className="font-bold text-slate-800">{mode === "fresh" ? "Fresh Apparel Catalog" : "All Products Catalog"}</span>
           </div>
 
           {/* Catalog Hub Banner */}
@@ -1058,7 +1285,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   Verified B2B Dhaka Clearance Registry
                 </span>
                 <h2 className="font-display font-black text-lg xs:text-xl sm:text-2xl text-white uppercase tracking-tight">
-                  Unified Export Garment Surplus Catalog
+                  {mode === "fresh" ? "Fresh Ready Apparel Catalog" : "Unified Export Garment Surplus Catalog"}
                 </h2>
                 <details className="text-[10px] sm:text-xs text-slate-400 cursor-pointer select-none group border-t border-white/10 pt-2 bg-transparent">
                   <summary className="hover:text-[#feae2c] transition-colors outline-none font-sans font-semibold flex items-center gap-1">
@@ -1129,9 +1356,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           <div className="space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
               <h3 className="font-display font-black text-sm xs:text-base sm:text-lg uppercase text-slate-800 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                📦 Consolidated Surplus Inventory Cargo Grid
+                {mode === "fresh" ? "📦 Fresh Ready Apparel Grid" : "📦 Consolidated Surplus Inventory Cargo Grid"}
                 <span className="bg-[#0b1329] text-[#feae2c] text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold font-mono">
-                  {filteredProducts.length} Lots Found
+                  {filteredProducts.length} {mode === "fresh" ? "Items" : "Lots"} Found
                 </span>
               </h3>
 
@@ -1160,9 +1387,11 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-8 max-w-4xl mx-auto shadow-sm">
             <div className="text-center space-y-1 mb-8">
               <span className="text-[10px] font-mono text-[#feae2c] font-bold uppercase tracking-wider block">Custom Sourcing Hub</span>
-              <h4 className="font-display font-black text-lg uppercase text-primary">Custom Sourcing Specifications Inquiry</h4>
+                <h4 className="font-display font-black text-lg uppercase text-primary">Custom Sourcing Specifications Inquiry</h4>
               <p className="text-xs text-slate-500 max-w-xl mx-auto">
-                Need customized bulk quantities or assortments not listed in our consolidated overstock cargo grid? Complete our sourcing mandate form below, and our team will quote inside 2 hours.
+                {mode === "fresh"
+                  ? "Need customized bulk quantities or assortments not listed in our fresh apparel grid? Complete our sourcing mandate form below, and our team will quote inside 2 hours."
+                  : "Need customized bulk quantities or assortments not listed in our consolidated overstock cargo grid? Complete our sourcing mandate form below, and our team will quote inside 2 hours."}
               </p>
             </div>
 
@@ -1241,9 +1470,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         <div className="flex-1 max-w-7xl mx-auto px-2.5 xs:px-4 py-8 space-y-8 w-full">
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo("/")}>Home</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
             <span>/</span>
-            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo("/")}>Category Sourcing</span>
+            <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>{mode === "fresh" ? "Fresh Categories" : "Category Sourcing"}</span>
             <span>/</span>
             <span className="font-bold text-slate-800">{routeParams.slug}</span>
           </div>
@@ -1256,7 +1485,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: "radial-gradient(#ffffff 0.5px, transparent 0.9px)", backgroundSize: "32px 32px" }}></div>
                 <div className="relative z-10 max-w-4xl space-y-3 text-left">
                   <span className="px-2 py-0.5 bg-white/10 rounded font-mono text-[9px] font-bold text-[#feae2c] uppercase tracking-wider">
-                    COMPLIANT DIRECT CLEARANCE
+                    {mode === "fresh" ? "FACTORY FRESH DIRECT" : "COMPLIANT DIRECT CLEARANCE"}
                   </span>
                   <h2 className="font-display font-black text-lg xs:text-xl sm:text-2xl text-white uppercase tracking-tight">
                     {seo.heading}
@@ -1283,9 +1512,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
           {/* Matching product list cargo */}
           <div className="space-y-4">
             <h3 className="font-display font-black text-sm xs:text-base sm:text-lg uppercase text-slate-800 flex flex-wrap items-center gap-1.5 sm:gap-2">
-              📂 ACTIVE {routeParams.slug?.toUpperCase()} STOCK LOTS
+              {mode === "fresh" ? "📂 FRESH" : "📂 ACTIVE"} {routeParams.slug?.toUpperCase()} {mode === "fresh" ? "GOODS" : "STOCK LOTS"}
               <span className="bg-[#0b1329] text-[#feae2c] font-mono text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-bold">
-                {products.filter(p => p.category.toLowerCase() === routeParams.slug?.toLowerCase()).length} cargo batches
+                {products.filter(p => p.category.toLowerCase() === routeParams.slug?.toLowerCase()).length} {mode === "fresh" ? "items" : "cargo batches"}
               </span>
             </h3>
             
@@ -1306,7 +1535,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             <div className="text-center space-y-1 mb-6">
               <span className="text-[10px] font-mono text-[#feae2c] font-bold uppercase tracking-wider block">Dhaka B2B Desk</span>
               <h4 className="font-display font-black text-base uppercase text-primary">Bulk Category Sourcing Mandate</h4>
-              <p className="text-xs text-slate-500">Need specific customized configurations for entire category {routeParams.slug}? Transmit specifications directly.</p>
+              <p className="text-xs text-slate-500">{mode === "fresh" ? "Need specific configurations for fresh " : "Need specific customized configurations for entire category "}{routeParams.slug}? Transmit specifications directly.</p>
             </div>
 
             <form onSubmit={(e) => handleCategoryPageInquirySubmit(e, routeParams.slug || "Category")} className="space-y-4 text-xs font-sans">
@@ -1390,8 +1619,8 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               return (
                 <div className="p-16 border rounded bg-white text-center text-slate-500 italic max-w-md mx-auto space-y-4">
                   <p>Product Sourcing Index not found or currently updating.</p>
-                  <button onClick={() => navigateTo("/")} className="px-4 py-2 bg-slate-900 text-[#feae2c] font-bold text-xs uppercase rounded cursor-pointer">
-                    Return to Dhaka Hub Catalog
+                  <button onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")} className="px-4 py-2 bg-slate-900 text-[#feae2c] font-bold text-xs uppercase rounded cursor-pointer">
+                    Return to {mode === "fresh" ? "Fresh Goods" : "Dhaka Hub"} Catalog
                   </button>
                 </div>
               );
@@ -1401,9 +1630,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <>
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo("/")}>Home</span>
+                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}>Home</span>
                   <span>/</span>
-                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(`/category/${encodeURIComponent(prod.category)}`)}>{prod.category}</span>
+                  <span className="hover:text-primary cursor-pointer" onClick={() => navigateTo(`${mode === "fresh" ? "/fresh-goods" : ""}/category/${encodeURIComponent(prod.category)}`)}>{prod.category}</span>
                   <span>/</span>
                   <span className="font-bold text-slate-800">SKU #{prod.sku}</span>
                 </div>
@@ -1411,10 +1640,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 {/* Return anchor */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-b border-slate-100 pb-5">
                   <button
-                    onClick={() => navigateTo("/")}
+                    onClick={() => navigateTo(mode === "fresh" ? "/fresh-goods" : "/")}
                     className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-slate-700 hover:text-indigo-950 cursor-pointer"
                   >
-                    <ArrowLeft size={14} /> Back to Sourcing clearing home page
+                    <ArrowLeft size={14} /> Back to {mode === "fresh" ? "Fresh Goods" : "Sourcing clearing"} home page
                   </button>
 
                   <div className="font-mono text-[9px] uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded border border-slate-200/60 max-w-max">
@@ -1426,17 +1655,17 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 <div className="space-y-2 pt-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 bg-[#0b1329] text-[#feae2c] border border-white/5 rounded font-mono text-[9px] font-bold uppercase tracking-wider">
-                      {prod.category} Allocation Batch
+                      {mode === "fresh" ? `${prod.category} Fresh Batch` : `${prod.category} Allocation Batch`}
                     </span>
                     <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Dhaka Verified Batch
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> {mode === "fresh" ? "Factory Fresh" : "Dhaka Verified Batch"}
                     </span>
                   </div>
                   <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-[#0b1329] leading-tight uppercase">
                     {prod.title}
                   </h2>
                   <p className="text-xs text-slate-400 font-mono">
-                    Export Lot Entry Ref: <span className="text-indigo-950 font-bold select-all font-mono">SKU #{prod.sku}</span> | Chittagong Customs Seal Eligible
+                    {mode === "fresh" ? "Product Ref:" : "Export Lot Entry Ref:"} <span className="text-indigo-950 font-bold select-all font-mono">SKU #{prod.sku}</span> | Chittagong Customs Seal Eligible
                   </p>
                 </div>
 
@@ -1464,10 +1693,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigateTo("/products");
+                              navigateTo(mode === "fresh" ? "/fresh-goods/products" : "/products");
                             }}
                             className="bg-[#feae2c] hover:bg-[#0b1329] hover:text-[#feae2c] text-indigo-950 font-display font-black text-[9px] uppercase tracking-wider px-2 py-1 rounded shadow border border-[#feae2c]/20 flex items-center gap-1 cursor-pointer transition-all active:scale-95 duration-150 animate-fadeIn"
-                            title="View all factory products together"
+                            title="View all products"
                           >
                             <Package size={9} />
                             View All
@@ -1839,7 +2068,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
           <div className="space-y-3">
             <h5 className="font-display font-black text-sm uppercase text-white">H and N Fashion BD</h5>
-            <p className="text-[11px] text-slate-400">Bangladesh's premier B2B garment wholesale. Export quality surplus at wholesale prices.</p>
+            <p className="text-[11px] text-slate-400">{mode === "fresh" ? "Bangladesh's wholesale fresh apparel exporter. Factory direct ready garments for global buyers." : "Bangladesh's premier B2B garment wholesale. Export quality surplus at wholesale prices."}</p>
           </div>
           <div>
             <h6 className="font-display font-bold uppercase text-[10px] tracking-wider text-slate-400 mb-3">Categories</h6>

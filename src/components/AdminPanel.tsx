@@ -39,6 +39,8 @@ export default function AdminPanel() {
   const [moq, setMoq] = useState("");
   const [image, setImage] = useState("");
   const [featured, setFeatured] = useState(false);
+  const [productType, setProductType] = useState<'stock' | 'fresh'>('stock');
+  const [productTypeFilter, setProductTypeFilter] = useState<string>('all');
 
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [inquiryFilter, setInquiryFilter] = useState<"all" | "today" | "week">("all");
@@ -104,20 +106,21 @@ export default function AdminPanel() {
     setCategory("T-Shirts"); setStatus("Pure Export Quality");
     setMaterial("100% Cotton"); setMoq("5000");
     setImage("https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800");
-    setFeatured(false); setIsFormOpen(true);
+    setFeatured(false); setProductType('stock'); setIsFormOpen(true);
   };
 
   const openEditForm = (prod: Product) => {
     setEditingProduct(prod); setTitle(prod.title); setSku(prod.sku);
     setQty(prod.qty.toString()); setCategory(prod.category);
     setStatus(prod.status); setMaterial(prod.material); setMoq(prod.moq.toString());
-    setImage(prod.image); setFeatured(prod.featured); setIsFormOpen(true);
+    setImage(prod.image); setFeatured(prod.featured);
+    setProductType(prod.productType || 'stock'); setIsFormOpen(true);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !sku || !qty || !moq) { alert("Fill all required fields."); return; }
-    const payload = { title, sku, qty: Number(qty), category, status, material, moq: Number(moq), image, featured };
+    const payload = { title, sku, qty: Number(qty), category, status, material, moq: Number(moq), image, featured, productType };
     try {
       const response = editingProduct
         ? await fetch(`/api/products/${editingProduct.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
@@ -139,7 +142,8 @@ export default function AdminPanel() {
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesType = productTypeFilter === "all" || (p.productType || "stock") === productTypeFilter;
+    return matchesSearch && matchesCategory && matchesType;
   });
 
   const recentInquiries = useMemo(() => {
@@ -679,6 +683,14 @@ export default function AdminPanel() {
                     {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#0a1122]">{cat}</option>)}
                   </select>
                 </div>
+                <div>
+                  <select value={productTypeFilter} onChange={e => setProductTypeFilter(e.target.value)}
+                    className="w-full text-xs bg-white/5 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-[#feae2c]">
+                    <option value="all" className="bg-[#0a1122]">All Types</option>
+                    <option value="stock" className="bg-[#0a1122]">Stock Goods</option>
+                    <option value="fresh" className="bg-[#0a1122]">Fresh Goods</option>
+                  </select>
+                </div>
                 <div className="text-right flex items-center justify-end text-xs text-slate-500 font-mono">
                   Counter: <span className="font-bold text-[#feae2c] ml-1">{filteredProducts.length}</span>
                 </div>
@@ -691,6 +703,7 @@ export default function AdminPanel() {
                       <th className="p-3 text-center w-10">F</th>
                       <th className="p-3">Product</th>
                       <th className="p-3">Category</th>
+                      <th className="p-3">Type</th>
                       <th className="p-3 text-right">Qty</th>
                       <th className="p-3 text-right">MOQ</th>
                       <th className="p-3 text-center">Actions</th>
@@ -698,7 +711,7 @@ export default function AdminPanel() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {filteredProducts.length === 0 ? (
-                      <tr><td colSpan={6} className="p-8 text-center text-slate-600 italic">No products found</td></tr>
+                      <tr><td colSpan={7} className="p-8 text-center text-slate-600 italic">No products found</td></tr>
                     ) : (
                       filteredProducts.map(p => (
                         <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
@@ -716,6 +729,11 @@ export default function AdminPanel() {
                           </td>
                           <td className="p-3">
                             <span className="bg-white/5 text-slate-300 font-bold uppercase text-[9px] px-2 py-1 rounded-lg">{p.category}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-lg ${(p.productType || "stock") === "fresh" ? "bg-emerald-500/10 text-emerald-400" : "bg-[#feae2c]/10 text-[#feae2c]"}`}>
+                              {(p.productType || "stock") === "fresh" ? "Fresh" : "Stock"}
+                            </span>
                           </td>
                           <td className="p-3 text-right font-bold text-emerald-400">{p.qty.toLocaleString()}</td>
                           <td className="p-3 text-right text-slate-400">{p.moq.toLocaleString()}</td>
@@ -841,6 +859,14 @@ export default function AdminPanel() {
                   <select value={category} onChange={e => setCategory(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#feae2c]">
                     {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#0a1122]">{cat}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono font-bold uppercase text-slate-400 mb-1">Product Type</label>
+                  <select value={productType} onChange={e => setProductType(e.target.value as 'stock' | 'fresh')}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#feae2c]">
+                    <option value="stock" className="bg-[#0a1122]">Stock Goods</option>
+                    <option value="fresh" className="bg-[#0a1122]">Fresh Goods</option>
                   </select>
                 </div>
               </div>

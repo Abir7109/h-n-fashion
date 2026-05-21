@@ -10,6 +10,7 @@ export interface Product {
   image: string;
   featured: boolean;
   addedAt: string;
+  productType?: 'stock' | 'fresh';
 }
 
 export interface Inquiry {
@@ -34,4 +35,18 @@ export interface Stats {
 export const CATEGORIES = [
   "Women",
   "Men"
+];
+
+export const FRESH_CATEGORIES = [
+  "T-Shirt",
+  "Polo Shirt",
+  "Tank Top",
+  "Leggings",
+  "Pant",
+  "Jogger",
+  "Hoodie",
+  "Boxer",
+  "Shirt",
+  "Denim Pant",
+  "Denim Shirt"
 ];

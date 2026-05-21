@@ -15,9 +15,14 @@ app.get("/api/debug", (_req, res) => {
 });
 
 // PRODUCTS
-app.get("/api/products", async (_req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
-    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    const type = req.query.type as string;
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+    if (type === "fresh" || type === "stock") {
+      query = query.eq("product_type", type);
+    }
+    const { data, error } = await query;
     if (error) return res.status(500).json({ error: error.message, code: error.code, details: error.details, hint: error.hint });
     res.json(data || []);
   } catch (e: any) {
@@ -36,6 +41,7 @@ app.post("/api/products", async (req, res) => {
     moq: Number(req.body.moq) || 1000,
     image: req.body.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
     featured: req.body.featured === true,
+    product_type: req.body.productType || "stock",
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
@@ -50,6 +56,7 @@ app.put("/api/products/:id", async (req, res) => {
     moq: req.body.moq !== undefined ? Number(req.body.moq) : undefined,
     image: req.body.image,
     featured: req.body.featured !== undefined ? req.body.featured === true : undefined,
+    product_type: req.body.productType,
   }).eq("id", req.params.id).select().single();
   if (error) return res.status(error.code === "PGRST116" ? 404 : 500).json({ error: error.message });
   res.json(data);
@@ -96,9 +103,14 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // STATS
-app.get("/api/stats", async (_req, res) => {
+app.get("/api/stats", async (req, res) => {
+  const type = req.query.type as string;
+  let prodQuery = supabase.from("products").select("*");
+  if (type === "fresh" || type === "stock") {
+    prodQuery = prodQuery.eq("product_type", type);
+  }
   const [p, i] = await Promise.all([
-    supabase.from("products").select("*"),
+    prodQuery,
     supabase.from("inquiries").select("id", { count: "exact" }),
   ]);
   if (p.error) return res.status(500).json({ error: p.error.message });

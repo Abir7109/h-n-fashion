@@ -27,11 +27,13 @@ async function startServer() {
   });
 
   // PRODUCTS API
-  app.get("/api/products", async (_req, res) => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+  app.get("/api/products", async (req, res) => {
+    const type = req.query.type as string;
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+    if (type === "fresh" || type === "stock") {
+      query = query.eq("product_type", type);
+    }
+    const { data, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   });
@@ -49,6 +51,7 @@ async function startServer() {
         moq: Number(req.body.moq) || 1000,
         image: req.body.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
         featured: req.body.featured === true,
+        product_type: req.body.productType || "stock",
       })
       .select()
       .single();
@@ -69,6 +72,7 @@ async function startServer() {
         moq: req.body.moq !== undefined ? Number(req.body.moq) : undefined,
         image: req.body.image,
         featured: req.body.featured !== undefined ? req.body.featured === true : undefined,
+        product_type: req.body.productType,
       })
       .eq("id", req.params.id)
       .select()
@@ -135,8 +139,13 @@ async function startServer() {
   });
 
   // STATS
-  app.get("/api/stats", async (_req, res) => {
-    const { data: products, error: prodErr } = await supabase.from("products").select("*");
+  app.get("/api/stats", async (req, res) => {
+    const type = req.query.type as string;
+    let prodQuery = supabase.from("products").select("*");
+    if (type === "fresh" || type === "stock") {
+      prodQuery = prodQuery.eq("product_type", type);
+    }
+    const { data: products, error: prodErr } = await prodQuery;
     const { data: inquiries, error: inqErr } = await supabase.from("inquiries").select("id");
 
     if (prodErr || inqErr) return res.status(500).json({ error: "Failed to fetch stats" });
@@ -245,7 +254,7 @@ async function startServer() {
       if (visitor) recommendedCategories = visitor.categories || [];
     }
 
-    let query = supabase.from("products").select("*");
+    let query = supabase.from("products").select("*").eq("product_type", "stock");
 
     if (recommendedCategories.length > 0) {
       query = query.in("category", recommendedCategories);
