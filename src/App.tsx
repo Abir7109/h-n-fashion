@@ -1014,51 +1014,56 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   <h3 className="font-display font-black text-base uppercase text-[#0b1329]">{mode === "fresh" ? "Fresh Goods" : "Stock Lots"}</h3>
                   <span className="bg-[#feae2c]/10 text-[#feae2c] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{filteredProducts.length} products</span>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none -mx-3 px-3">
-                  {filteredProducts.map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-                      className="shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative min-w-0"
-                    >
-                      <img src={p.image} alt={p.title}
-                          className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
-                          referrerPolicy="no-referrer" loading="lazy" />
-                        <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
-                          {p.category}
-                        </span>
-                        {p.featured && (
-                          <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
-                            Featured
+                <div className="relative">
+                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none -mx-3 px-3">
+                    {filteredProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
+                        className="shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative min-w-0"
+                      >
+                        <img src={p.image} alt={p.title}
+                            className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer" loading="lazy" />
+                          <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
+                            {p.category}
                           </span>
-                        )}
-                        <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
-                          #{p.sku}
-                        </div>
-                      <div className="p-2.5 sm:p-3 space-y-1.5">
-                        <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                          {p.title}
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
-                          <span className="bg-[#0b1329]/10 text-[#0b1329] px-1.5 py-0.5 rounded font-semibold">{p.category}</span>
-                          <span className="text-slate-400">#{p.sku}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
-                          <div>
-                            <span className="text-[7px] text-slate-400 uppercase">Ready</span>
-                            <p className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</p>
+                          {p.featured && (
+                            <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
+                              Featured
+                            </span>
+                          )}
+                          <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
+                            #{p.sku}
                           </div>
-                          <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                        <div className="p-2.5 sm:p-3 space-y-1.5">
+                          <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                            {p.title}
+                          </h4>
+                          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
+                            <span className="bg-[#0b1329]/10 text-[#0b1329] px-1.5 py-0.5 rounded font-semibold">{p.category}</span>
+                            <span className="text-slate-400">#{p.sku}</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
+                            <div>
+                              <span className="text-[7px] text-slate-400 uppercase">Ready</span>
+                              <p className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</p>
+                            </div>
+                            <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
+                            className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
+                          >
+                            Inquire Now
+                          </button>
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
-                          className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
-                        >
-                          Inquire Now
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="absolute right-0 top-0 bottom-3 w-16 bg-gradient-to-l from-white via-white/60 to-transparent pointer-events-none flex items-center justify-end pr-1.5">
+                    <ChevronRight size={18} className="text-[#feae2c] animate-pulse" />
+                  </div>
                 </div>
               </>
             )}
@@ -1074,51 +1079,56 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   <h3 className="font-display font-black text-base uppercase text-[#0b1329]">Recommended for You</h3>
                   <span className="bg-[#feae2c]/10 text-[#feae2c] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Based on your interest</span>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none -mx-3 px-3">
-                  {recommendedProducts.map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
-                      className="shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative min-w-0"
-                    >
-                      <img src={p.image} alt={p.title}
-                          className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
-                          referrerPolicy="no-referrer" loading="lazy" />
-                        <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
-                          {p.category}
-                        </span>
-                        {p.featured && (
-                          <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
-                            Featured
+                <div className="relative">
+                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none -mx-3 px-3">
+                    {recommendedProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
+                        className="shrink-0 w-[200px] xs:w-[220px] sm:w-[240px] group bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer relative min-w-0"
+                      >
+                        <img src={p.image} alt={p.title}
+                            className="w-full h-36 xs:h-40 sm:h-44 object-cover bg-slate-100 group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer" loading="lazy" />
+                          <span className="absolute top-1 left-1 bg-slate-900/90 text-white font-mono font-bold text-[6px] xs:text-[8px] tracking-wider uppercase px-1 py-0.5 rounded">
+                            {p.category}
                           </span>
-                        )}
-                        <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
-                          #{p.sku}
-                        </div>
-                      <div className="p-2.5 sm:p-3 space-y-1.5">
-                        <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                          {p.title}
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
-                          <span className="bg-[#0b1329]/10 text-[#0b1329] px-1.5 py-0.5 rounded font-semibold">{p.category}</span>
-                          <span className="text-slate-400">#{p.sku}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
-                          <div>
-                            <span className="text-[7px] text-slate-400 uppercase">Ready</span>
-                            <p className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</p>
+                          {p.featured && (
+                            <span className="absolute top-1 right-1 bg-[#feae2c] text-indigo-950 font-black text-[5px] xs:text-[7px] uppercase px-1 py-0.5 rounded shadow">
+                              Featured
+                            </span>
+                          )}
+                          <div className="absolute bottom-1 left-1 bg-slate-950/80 text-white font-mono text-[6px] xs:text-[8px] px-1 rounded">
+                            #{p.sku}
                           </div>
-                          <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                        <div className="p-2.5 sm:p-3 space-y-1.5">
+                          <h4 className="font-display font-bold text-[11px] sm:text-xs text-[#0b1329] group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                            {p.title}
+                          </h4>
+                          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
+                            <span className="bg-[#0b1329]/10 text-[#0b1329] px-1.5 py-0.5 rounded font-semibold">{p.category}</span>
+                            <span className="text-slate-400">#{p.sku}</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
+                            <div>
+                              <span className="text-[7px] text-slate-400 uppercase">Ready</span>
+                              <p className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</p>
+                            </div>
+                            <span className="text-[7px] sm:text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 font-semibold">{p.status}</span>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
+                            className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
+                          >
+                            Inquire Now
+                          </button>
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`); }}
-                          className="w-full py-1.5 bg-[#feae2c] hover:bg-[#0b1329] hover:text-white text-[#0b1329] font-bold text-[9px] sm:text-[10px] uppercase tracking-wide rounded transition-all"
-                        >
-                          Inquire Now
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="absolute right-0 top-0 bottom-3 w-16 bg-gradient-to-l from-white via-white/60 to-transparent pointer-events-none flex items-center justify-end pr-1.5">
+                    <ChevronRight size={18} className="text-[#feae2c] animate-pulse" />
+                  </div>
                 </div>
               </div>
             )}
