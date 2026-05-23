@@ -8,6 +8,7 @@ export interface Product {
   material: string;
   moq: number;
   image: string;
+  images?: string[];
   featured: boolean;
   addedAt: string;
   productType?: 'stock' | 'fresh';

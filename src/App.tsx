@@ -329,7 +329,15 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
   const getProductImages = (prod: Product): string[] => {
     const mainImage = prod.image;
     const category = (prod.category || "").toLowerCase();
-    
+
+    // Use uploaded images array when available (from ImageKit upload)
+    const uploadedImages = (prod as any).images;
+    if (uploadedImages && Array.isArray(uploadedImages) && uploadedImages.length > 0) {
+      return uploadedImages.length >= 4
+        ? uploadedImages.slice(0, 4)
+        : [mainImage, ...uploadedImages.filter((u: string) => u !== mainImage)].slice(0, 4);
+    }
+
     if (mode === "fresh") {
       const freshAlternates: { [key: string]: string[] } = {
         "t-shirt": [

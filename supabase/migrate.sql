@@ -6,10 +6,30 @@
 -- 1. Add product_type column to existing products table
 ALTER TABLE products ADD COLUMN IF NOT EXISTS product_type TEXT NOT NULL DEFAULT 'stock';
 
--- 2. Update existing stock products
+-- 2. Add images array column for multiple product images
+ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+
+-- 3. Update existing stock products
 UPDATE products SET product_type = 'stock' WHERE product_type IS NULL OR product_type = '';
 
--- 3. Insert fresh goods products
+-- 4. Create storage bucket for product images (run this part in Storage section too)
+-- Go to Storage > Create bucket > name: "products", public bucket: ON
+-- Or run via SQL:
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+SELECT 'products', 'products', true, 10485760, '{image/jpeg,image/png,image/webp,image/gif}'
+WHERE NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'products');
+
+-- Allow public access to read files in products bucket
+INSERT INTO storage.policies (name, definition, bucket_id)
+SELECT 'Public Read', '(bucket_id = ''products''::text)', 'products'
+WHERE NOT EXISTS (SELECT 1 FROM storage.policies WHERE name = 'Public Read' AND bucket_id = 'products');
+
+-- Allow service role (admin) to upload/delete files in products bucket
+INSERT INTO storage.policies (name, definition, bucket_id, owner)
+SELECT 'Admin Upload', '(bucket_id = ''products''::text)', 'products', 'authenticated'
+WHERE NOT EXISTS (SELECT 1 FROM storage.policies WHERE name = 'Admin Upload' AND bucket_id = 'products');
+
+-- 5. Insert fresh goods products
 INSERT INTO products (title, sku, qty, category, status, material, moq, featured, image, product_type)
 SELECT * FROM (VALUES
   ('PREMIUM COTTON T-SHIRT - SOLID COLORS', 'FRESH-TS-001', 25000, 'T-Shirt', 'Factory Fresh - Ready to Ship', '100% Combed Cotton 30s', 2000, true, '/product-images/fresh/t-shirt.jpg', 'fresh'),

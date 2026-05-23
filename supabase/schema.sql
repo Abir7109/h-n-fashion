@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS products (
   material TEXT NOT NULL DEFAULT '100% Cotton',
   moq INTEGER NOT NULL DEFAULT 1000,
   image TEXT NOT NULL DEFAULT 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800',
+  images TEXT[] DEFAULT '{}',
   featured BOOLEAN NOT NULL DEFAULT false,
   product_type TEXT NOT NULL DEFAULT 'stock',
   added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

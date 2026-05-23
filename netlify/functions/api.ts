@@ -1,10 +1,35 @@
 import express from "express";
 import serverless from "serverless-http";
 import { createClient } from "@supabase/supabase-js";
+import multer from "multer";
+import ImageKit from "imagekit";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://hjvqfvrgwgoffqgdmpob.supabase.co";
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnFmdnJnd2dvZmZxZ2RtcG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDY3ODksImV4cCI6MjA5NDkyMjc4OX0.3NQ5e90FAydaLM_KCtLbbpEX5l4gKxOp4vQpuAd2MHA";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+});
+
+const MAX_PRODUCTS = Number(process.env.MAX_PRODUCTS) || 5;
+const MAX_IMAGES = Number(process.env.MAX_IMAGES_PER_PRODUCT) || 3;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"));
+  }
+});
+
+const imagekit = process.env.IMAGEKIT_PRIVATE_KEY && process.env.IMAGEKIT_PRIVATE_KEY !== "your_private_key"
+  ? new ImageKit({
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "",
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || "",
+    })
+  : null;
 
 const app = express();
 app.use(express.json());
@@ -12,6 +37,85 @@ app.use(express.json());
 // Debug endpoint
 app.get("/api/debug", (_req, res) => {
   res.json({ supabaseUrl: supabaseUrl ? supabaseUrl.substring(0, 30) + "..." : "NOT SET", anonKey: supabaseAnonKey ? "SET (" + supabaseAnonKey.substring(0, 20) + "..." : "NOT SET" });
+});
+
+// HYBRID UPLOAD: Supabase Storage (primary) → ImageKit (fallback) → base64 (last resort)
+async function ensureStorageBucket() {
+  const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+  if (!buckets?.find(b => b.name === "products")) {
+    await supabaseAdmin.storage.createBucket("products", {
+      public: true,
+      fileSizeLimit: 10 * 1024 * 1024,
+      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    });
+  }
+}
+
+app.post("/api/upload", upload.array("files", MAX_IMAGES), async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) return res.status(400).json({ error: "No files provided" });
+
+    const urls: string[] = [];
+    const errors: string[] = [];
+    let usedFallback = false;
+
+    for (const file of files) {
+      const ext = file.originalname.split(".").pop() || "jpg";
+      const fileName = `product_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      let uploaded = false;
+
+      // TIER 1: Supabase Storage
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "your_service_role_key") {
+        try {
+          await ensureStorageBucket();
+          const { error: uploadErr } = await supabaseAdmin.storage
+            .from("products")
+            .upload(fileName, file.buffer, { contentType: file.mimetype, upsert: false });
+          if (!uploadErr) {
+            const { data: { publicUrl } } = supabaseAdmin.storage.from("products").getPublicUrl(fileName);
+            urls.push(publicUrl);
+            uploaded = true;
+          } else {
+            errors.push(`Supabase: ${uploadErr.message}`);
+          }
+        } catch (sbErr: any) {
+          errors.push(`Supabase: ${sbErr.message}`);
+        }
+      }
+
+      // TIER 2: ImageKit fallback
+      if (!uploaded && imagekit) {
+        try {
+          const result = await imagekit.upload({
+            file: file.buffer,
+            fileName,
+            folder: "/h-n-fashion/products",
+            useUniqueFileName: true,
+          });
+          urls.push(result.url);
+          uploaded = true;
+          usedFallback = true;
+        } catch (ikErr: any) {
+          errors.push(`ImageKit: ${ikErr.message}`);
+        }
+      }
+
+      // TIER 3: base64 last resort
+      if (!uploaded) {
+        urls.push(`data:${file.mimetype};base64,${file.buffer.toString("base64")}`);
+        usedFallback = true;
+      }
+    }
+
+    res.json({
+      urls,
+      ...(usedFallback ? { warning: "Primary storage unavailable, used fallback." } : {}),
+      ...(errors.length > 0 ? { errors } : {}),
+    });
+  } catch (e: any) {
+    res.status(500).json({ error: e?.message || String(e) });
+  }
 });
 
 // PRODUCTS
@@ -33,7 +137,18 @@ app.get("/api/products", async (req, res) => {
 });
 
 app.post("/api/products", async (req, res) => {
-  const { data, error } = await supabase.from("products").insert({
+  const { count, error: countErr } = await supabaseAdmin
+    .from("products")
+    .select("id", { count: "exact", head: true });
+  if (countErr) return res.status(500).json({ error: countErr.message });
+  if (count! >= MAX_PRODUCTS) {
+    return res.status(400).json({
+      error: `Product limit reached (max ${MAX_PRODUCTS}). Delete an existing product before adding a new one.`
+    });
+  }
+
+  const images: string[] = req.body.images || [];
+  const { data, error } = await supabaseAdmin.from("products").insert({
     title: req.body.title || "Untitled",
     sku: req.body.sku || "N/A",
     qty: Number(req.body.qty) || 0,
@@ -41,7 +156,8 @@ app.post("/api/products", async (req, res) => {
     status: req.body.status || "Pure Export Quality",
     material: req.body.material || "100% Cotton",
     moq: Number(req.body.moq) || 1000,
-    image: req.body.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
+    image: images[0] || req.body.image || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800",
+    images: images.length > 0 ? images : null,
     featured: req.body.featured === true,
     product_type: req.body.productType || "stock",
   }).select().single();
@@ -50,23 +166,30 @@ app.post("/api/products", async (req, res) => {
 });
 
 app.put("/api/products/:id", async (req, res) => {
-  const { data, error } = await supabase.from("products").update({
+  const images: string[] | undefined = req.body.images;
+  const updateData: any = {
     title: req.body.title, sku: req.body.sku,
     qty: req.body.qty !== undefined ? Number(req.body.qty) : undefined,
     category: req.body.category, status: req.body.status,
     material: req.body.material,
     moq: req.body.moq !== undefined ? Number(req.body.moq) : undefined,
-    image: req.body.image,
+    image: images ? images[0] : req.body.image,
     featured: req.body.featured !== undefined ? req.body.featured === true : undefined,
     product_type: req.body.productType,
-  }).eq("id", req.params.id).select().single();
+  };
+  if (images !== undefined) updateData.images = images.length > 0 ? images : null;
+
+  const { data, error } = await supabaseAdmin.from("products").update(updateData).eq("id", req.params.id).select().single();
   if (error) return res.status(error.code === "PGRST116" ? 404 : 500).json({ error: error.message });
   res.json(data);
 });
 
 app.delete("/api/products/:id", async (req, res) => {
-  const { error } = await supabase.from("products").delete().eq("id", req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
+  const { error } = await supabaseAdmin.from("products").delete().eq("id", req.params.id);
+  if (error) {
+    console.error("Delete error:", error);
+    return res.status(500).json({ error: error.message });
+  }
   res.json({ success: true });
 });
 
@@ -75,7 +198,10 @@ const MIGRATE_SQL = `
 -- 1. Add product_type column to products (if missing)
 ALTER TABLE products ADD COLUMN IF NOT EXISTS product_type TEXT NOT NULL DEFAULT 'stock';
 
--- 2. Create inquiries table
+-- 2. Add images array column for multiple product images
+ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+
+-- 3. Create inquiries table
 CREATE TABLE IF NOT EXISTS inquiries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name TEXT NOT NULL,
@@ -93,10 +219,15 @@ DROP POLICY IF EXISTS "Admin can read inquiries" ON inquiries;
 DROP POLICY IF EXISTS "Public can read inquiries" ON inquiries;
 CREATE POLICY "Public can insert inquiries" ON inquiries FOR INSERT TO anon WITH CHECK (true);
 CREATE POLICY "Public can read inquiries" ON inquiries FOR SELECT TO anon USING (true);
+
+-- 4. Create storage bucket for product images
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+SELECT 'products', 'products', true, 10485760, '{image/jpeg,image/png,image/webp,image/gif}'
+WHERE NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'products');
 `;
 
 app.get("/api/migrate", async (_req, res) => {
-  res.json({ success: true, sql: MIGRATE_SQL, instructions: "Copy this SQL and run it in your Supabase dashboard > SQL Editor." });
+  res.json({ success: true, sql: MIGRATE_SQL, instructions: "Copy this SQL and run it in your Supabase dashboard > SQL Editor. Also set SUPABASE_SERVICE_ROLE_KEY in your .env (get it from Supabase Dashboard > Settings > API)." });
 });
 
 // INQUIRIES
