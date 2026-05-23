@@ -103,10 +103,6 @@ export default function AdminPanel() {
   };
 
   const openAddForm = () => {
-    if (products.length >= 5) {
-      alert("Product limit reached (max 5). Delete an existing product before adding a new one.");
-      return;
-    }
     setEditingProduct(null);
     setTitle(""); setSku(""); setQty("100000");
     setCategory("T-Shirts"); setStatus("Pure Export Quality");
@@ -674,7 +670,7 @@ export default function AdminPanel() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                   <div>
                     <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">Product Inventory</h3>
-                    <p className="text-[10px] text-slate-500 font-mono">{products.length} / 5 products {products.length >= 5 ? <span className="text-red-400">(limit reached)</span> : ""}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">{products.length} products</p>
                   </div>
                   <button onClick={openAddForm}
                     className="px-4 py-2 bg-gradient-to-r from-[#feae2c] to-[#ffc933] text-[#0b1329] font-display font-black text-[10px] uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#feae2c]/20 transition-all flex items-center gap-2 cursor-pointer">

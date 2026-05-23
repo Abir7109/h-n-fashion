@@ -22,7 +22,6 @@ const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROL
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
-const MAX_PRODUCTS = Number(process.env.MAX_PRODUCTS) || 5;
 const MAX_IMAGES = Number(process.env.MAX_IMAGES_PER_PRODUCT) || 3;
 
 const upload = multer({
@@ -147,16 +146,6 @@ async function startServer() {
   });
 
   app.post("/api/products", async (req, res) => {
-    const { count, error: countErr } = await supabaseAdmin
-      .from("products")
-      .select("id", { count: "exact", head: true });
-    if (countErr) return res.status(500).json({ error: countErr.message });
-    if (count! >= MAX_PRODUCTS) {
-      return res.status(400).json({
-        error: `Product limit reached (max ${MAX_PRODUCTS}). Delete an existing product before adding a new one.`
-      });
-    }
-
     const images: string[] = req.body.images || [];
     const { data, error } = await supabaseAdmin
       .from("products")
