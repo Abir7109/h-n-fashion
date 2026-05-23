@@ -115,7 +115,7 @@ export default function InquiryModal({ product, isOpen, onClose, onSuccess }: In
                   {product.title}
                 </h4>
                 <p className="text-xs text-on-surface-variant font-mono">
-                  SKU: #{product.sku} | QC Standard: AQL 1.5
+                  SKU: #{product.sku} | QC Standard: AQL 2.5
                 </p>
               </div>
             </div>

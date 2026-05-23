@@ -66,7 +66,7 @@ Verified by Independent AQL-1.5 Inspector.
         <div className="bg-primary text-white p-4 sm:p-5 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="bg-success-emerald/20 text-success-emerald border border-success-emerald/30 text-[9px] sm:text-[10px] font-mono uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded">
-              AQL 1.5 CERTIFIED
+              AQL 2.5 CERTIFIED
             </span>
             <span className="text-white/60 font-mono text-[11px] sm:text-xs">Lot specs verified</span>
           </div>
@@ -185,7 +185,7 @@ Verified by Independent AQL-1.5 Inspector.
                   </div>
                   <div className="p-3 bg-surface-container border border-outline-variant rounded text-center">
                     <span className="block text-[10px] font-bold text-on-surface-variant/70 uppercase">AQL Pass</span>
-                    <span className="font-display font-bold text-xs text-primary">AQL 1.5 Audit</span>
+                    <span className="font-display font-bold text-xs text-primary">AQL 2.5 Audit</span>
                   </div>
                   <div className="p-3 bg-surface-container border border-outline-variant rounded text-center">
                     <span className="block text-[10px] font-bold text-on-surface-variant/70 uppercase">Document</span>

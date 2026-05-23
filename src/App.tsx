@@ -902,7 +902,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         <p className="text-[10px] text-slate-400 mt-1">Total Pcs</p>
                       </div>
                       <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
-                        <span className="text-2xl font-black text-emerald-400">AQL 1.5</span>
+                        <span className="text-2xl font-black text-emerald-400">AQL 2.5</span>
                         <p className="text-[10px] text-slate-400 mt-1">Verified</p>
                       </div>
                     </div>
@@ -967,7 +967,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         <p className="text-[10px] text-slate-400 mt-1">Total Pcs</p>
                       </div>
                       <div className="bg-white/10 border border-white/10 rounded-xl p-4 text-center min-w-[120px]">
-                        <span className="text-2xl font-black text-emerald-400">AQL 1.5</span>
+                        <span className="text-2xl font-black text-emerald-400">AQL 2.5</span>
                         <p className="text-[10px] text-slate-400 mt-1">Verified</p>
                       </div>
                     </div>
@@ -981,7 +981,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center gap-8 whitespace-nowrap text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">
                       <span className="text-[#feae2c]">● Live Dhaka Allocations Loaded</span>
-                      <span>• VERIFIED AQL 1.5 LOGISTICS PROTOCOLS</span>
+                      <span>• VERIFIED AQL 2.5 LOGISTICS PROTOCOLS</span>
                       <span className="text-[#feae2c]">• EXPORT PACKING COMPLIANT</span>
                       <span>• BRANDED DENIM & COTTON T-SHIRTS LIVE</span>
                       <span>• SHIP DIRECT FROM CHITTAGONG SEA PORT</span>
@@ -1123,7 +1123,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center">
                   <ShieldCheck size={20} className="mx-auto text-[#feae2c] mb-2" />
-                  <span className="text-xs font-bold">AQL 1.5 Verified</span>
+                  <span className="text-xs font-bold">AQL 2.5 Verified</span>
                 </div>
                 <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-center">
                   <Truck size={20} className="mx-auto text-[#feae2c] mb-2" />
@@ -1304,7 +1304,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     About this unified catalog & direct loading safety
                   </summary>
                   <p className="mt-2 text-[11px] text-slate-350 leading-relaxed bg-white/5 p-2.5 rounded border border-white/5">
-                    View and clear high-volume factory surplus clothing overstock directly from physical ready stocklots. Select active lots across multiple apparel categories, review inspection specifications, download packing indexes, and tranship compliance sheets safely. Guaranteed Authentic • Direct Warehouse Loading • AQL 1.5 Quality Specifications.
+                    View and clear high-volume factory surplus clothing overstock directly from physical ready stocklots. Select active lots across multiple apparel categories, review inspection specifications, download packing indexes, and tranship compliance sheets safely. Guaranteed Authentic • Direct Warehouse Loading • AQL 2.5 Quality Specifications.
                   </p>
                 </details>
               </div>
@@ -1822,7 +1822,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         <div className="space-y-2.5 text-xs font-mono text-slate-300">
                           <div className="flex justify-between">
                             <span className="text-slate-500">Standard Class:</span>
-                            <span className="font-bold">AQL 1.5 Quality Inspected</span>
+                            <span className="font-bold">AQL 2.5 Quality Inspected</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-slate-500">Origin Quality:</span>
@@ -2035,7 +2035,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                         <div className="space-y-2.5 text-xs font-mono text-slate-300">
                           <div className="flex justify-between">
                             <span className="text-slate-500">Standard Class:</span>
-                            <span className="font-bold">AQL 1.5 Quality Inspected</span>
+                            <span className="font-bold">AQL 2.5 Quality Inspected</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-slate-500">Origin Quality:</span>
