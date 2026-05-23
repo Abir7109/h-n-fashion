@@ -1018,7 +1018,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     <h3 className="font-display font-black text-base uppercase text-[#0b1329]">{mode === "fresh" ? "Fresh Goods" : "Stock Lots"}</h3>
                     <span className="bg-[#feae2c]/10 text-[#feae2c] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{filteredProducts.length} products</span>
                   </div>
-                  <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="text-[9px] sm:text-[10px] font-bold text-[#feae2c] bg-[#feae2c]/10 hover:bg-[#feae2c]/20 px-3 py-1.5 rounded-full uppercase tracking-wider transition-all shrink-0">
+                  <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="text-[9px] sm:text-[10px] font-bold text-white bg-[#feae2c] hover:bg-[#ffc933] px-3 py-1.5 rounded-full uppercase tracking-wider transition-all shrink-0 shadow-sm">
                     View All
                   </button>
                 </div>
