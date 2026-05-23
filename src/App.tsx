@@ -1075,9 +1075,6 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     </div>
                   </div>
                 </div>
-                <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="block sm:hidden w-full py-3 bg-[#feae2c] hover:bg-[#ffc933] text-[#0b1329] font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all mt-2">
-                  View All Products
-                </button>
               </>
             )}
 
@@ -1147,6 +1144,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                 </div>
               </div>
             )}
+
+            <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="block sm:hidden w-full py-3 bg-[#feae2c] hover:bg-[#ffc933] text-[#0b1329] font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all mt-2">
+              View All Products
+            </button>
 
           </section>
 
