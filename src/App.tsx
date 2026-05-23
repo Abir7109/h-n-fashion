@@ -3,7 +3,7 @@ import {
   Building, Package, MessageSquare, CheckCircle, ChevronRight, Download, Filter, 
   MapPin, PhoneCall, ShieldCheck, Mail, ArrowUpRight, Lock, ExternalLink, HelpCircle,
   ArrowLeft, FileText, Check, Award, Compass, Truck, ChevronLeft, X, Maximize2, ZoomIn,
-  Menu, FileCheck, CreditCard, Anchor, TrendingUp
+  Menu, FileCheck, CreditCard, Anchor, TrendingUp, Search
 } from "lucide-react";
 import { Product, CATEGORIES, FRESH_CATEGORIES } from "./types";
 import InquiryModal from "./components/InquiryModal";
@@ -70,6 +70,9 @@ export default function App() {
     }
     if (cleanPath === "/about" || cleanPath === "/about-us") {
       return { route: "about" };
+    }
+    if (cleanPath === "/browse") {
+      return { route: "browse" };
     }
     return { route: "home" };
   };
@@ -1010,9 +1013,14 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-display font-black text-base uppercase text-[#0b1329]">{mode === "fresh" ? "Fresh Goods" : "Stock Lots"}</h3>
-                  <span className="bg-[#feae2c]/10 text-[#feae2c] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{filteredProducts.length} products</span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-black text-base uppercase text-[#0b1329]">{mode === "fresh" ? "Fresh Goods" : "Stock Lots"}</h3>
+                    <span className="bg-[#feae2c]/10 text-[#feae2c] text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{filteredProducts.length} products</span>
+                  </div>
+                  <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="text-[9px] sm:text-[10px] font-bold text-[#feae2c] bg-[#feae2c]/10 hover:bg-[#feae2c]/20 px-3 py-1.5 rounded-full uppercase tracking-wider transition-all shrink-0">
+                    View All
+                  </button>
                 </div>
                 <div className="relative">
                   <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none -mx-3 px-3">
@@ -1298,6 +1306,125 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
             </div>
           </section>
         </>
+      )}
+
+      {/* BROWSE PAGE - Android-friendly full product listing with search */}
+      {routeParams.route === "browse" && (
+        <div className="flex-1 w-full animate-fadeIn bg-[#f8fafc]">
+          {/* Sticky search header */}
+          <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+            <div className="max-w-4xl mx-auto px-3 py-3">
+              <div className="flex items-center gap-3 mb-2">
+                <button onClick={() => navigateTo(mode === "fresh" ? "/" : "/stock-goods")} className="text-slate-600 hover:text-slate-900 p-1 -ml-1">
+                  <ArrowLeft size={20} />
+                </button>
+                <h1 className="font-display font-black text-sm uppercase text-[#0b1329] flex-1">
+                  {mode === "fresh" ? "All Fresh Goods" : "All Stock Lots"}
+                </h1>
+                <span className="bg-[#feae2c]/10 text-[#feae2c] text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  {filteredProducts.length}
+                </span>
+              </div>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#f1f4f9] border border-slate-200 rounded-xl py-2.5 pl-10 pr-9 text-sm outline-none focus:border-[#feae2c] focus:ring-1 focus:ring-[#feae2c]/30 transition-all"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <div className="mt-2 overflow-x-auto scrollbar-none -mx-3 px-3">
+                <div className="flex gap-1.5 pb-1">
+                  <button
+                    onClick={() => setSelectedCategory("All")}
+                    className={`shrink-0 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all ${
+                      selectedCategory === "All"
+                        ? "bg-[#0b1329] text-[#feae2c]"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {(mode === "fresh" ? FRESH_CATEGORIES : CATEGORIES).map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`shrink-0 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all ${
+                        selectedCategory === cat
+                          ? "bg-[#0b1329] text-[#feae2c]"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Product list */}
+          <div className="max-w-4xl mx-auto px-3 py-4">
+            {loading ? (
+              <div className="p-16 text-center space-y-3">
+                <div className="w-8 h-8 border-4 border-t-transparent border-primary rounded-full animate-spin mx-auto"></div>
+                <p className="text-xs font-mono text-slate-500">Loading products...</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="p-16 text-center">
+                <p className="text-sm text-slate-400 font-medium">No products found</p>
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="text-xs text-[#feae2c] font-bold mt-2 underline">
+                    Clear search
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredProducts.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => navigateTo(`${mode === "fresh" ? "" : "/stock-goods"}/product/${p.id}`)}
+                    className="flex gap-3 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:border-primary/30 transition-all cursor-pointer active:scale-[0.98]"
+                  >
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 bg-slate-100">
+                      <img src={p.image} alt={p.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
+                    </div>
+                    <div className="flex-1 min-w-0 py-2.5 pr-3 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start gap-1.5 mb-1">
+                          <span className="bg-[#0b1329]/10 text-[#0b1329] text-[7px] font-bold px-1.5 py-0.5 rounded uppercase shrink-0 mt-0.5">{p.category}</span>
+                          <span className="text-[#feae2c] text-[7px] font-bold bg-[#feae2c]/10 px-1.5 py-0.5 rounded shrink-0 mt-0.5">#{p.sku}</span>
+                        </div>
+                        <h4 className="font-display font-bold text-xs sm:text-sm text-[#0b1329] leading-snug line-clamp-2">{p.title}</h4>
+                      </div>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <div>
+                          <span className="text-[7px] text-slate-400 uppercase block leading-none">Ready Stock</span>
+                          <span className="font-bold text-primary text-[11px] sm:text-xs">{p.qty.toLocaleString()} pcs</span>
+                        </div>
+                        <span className={`text-[8px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+                          p.status === "available" || p.status === "Ready to Ship" || p.status === "Factory Fresh - Ready to Ship"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}>
+                          {p.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ALL PRODUCTS CATALOG HUB PAGE */}
