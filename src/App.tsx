@@ -1018,7 +1018,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     <h3 className="font-display font-black text-sm xs:text-base uppercase text-[#0b1329] truncate">{mode === "fresh" ? "Fresh Goods" : "Stock Lots"}</h3>
                     <span className="bg-[#feae2c]/10 text-[#feae2c] text-[7px] xs:text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">{filteredProducts.length} products</span>
                   </div>
-                  <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="text-[9px] sm:text-[10px] font-bold text-white bg-[#feae2c] hover:bg-[#ffc933] px-3 py-1.5 rounded-full uppercase tracking-wider transition-all shadow-sm">
+                  <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="hidden sm:inline-flex text-[9px] sm:text-[10px] font-bold text-white bg-[#feae2c] hover:bg-[#ffc933] px-3 py-1.5 rounded-full uppercase tracking-wider transition-all shadow-sm">
                     View All
                   </button>
                 </div>
@@ -1075,6 +1075,9 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     </div>
                   </div>
                 </div>
+                <button onClick={() => navigateTo(mode === "fresh" ? "/browse" : "/stock-goods/browse")} className="block sm:hidden w-full py-3 bg-[#feae2c] hover:bg-[#ffc933] text-[#0b1329] font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all mt-2">
+                  View All Products
+                </button>
               </>
             )}
 
