@@ -1061,8 +1061,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                       </div>
                     ))}
                   </div>
-                  <div className="absolute right-0 top-0 bottom-3 w-16 bg-gradient-to-l from-white via-white/60 to-transparent pointer-events-none flex items-center justify-end pr-1.5">
-                    <ChevronRight size={18} className="text-[#feae2c] animate-pulse" />
+                  <div className="absolute right-0 top-0 bottom-3 w-28 bg-gradient-to-l from-white via-white/70 to-transparent pointer-events-none flex items-center justify-end pr-3">
+                    <div className="bg-[#feae2c] text-white rounded-full p-2 shadow-lg animate-pulse">
+                      <ChevronRight size={22} />
+                    </div>
                   </div>
                 </div>
               </>
@@ -1126,8 +1128,10 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                       </div>
                     ))}
                   </div>
-                  <div className="absolute right-0 top-0 bottom-3 w-16 bg-gradient-to-l from-white via-white/60 to-transparent pointer-events-none flex items-center justify-end pr-1.5">
-                    <ChevronRight size={18} className="text-[#feae2c] animate-pulse" />
+                  <div className="absolute right-0 top-0 bottom-3 w-28 bg-gradient-to-l from-white via-white/70 to-transparent pointer-events-none flex items-center justify-end pr-3">
+                    <div className="bg-[#feae2c] text-white rounded-full p-2 shadow-lg animate-pulse">
+                      <ChevronRight size={22} />
+                    </div>
                   </div>
                 </div>
               </div>
