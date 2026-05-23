@@ -621,7 +621,7 @@ Authenticated by Independent SGS AQL-1.5 Inspections Desk, Dhaka office.
                     : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                {cat} ({count})
+                {cat} ({count}) <span className="text-slate-300 ml-1.5">|</span>
               </button>
             );
           })}
