@@ -141,7 +141,10 @@ export default function AdminPanel() {
     if (!confirm("Delete this product permanently?")) return;
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed.");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Delete failed.");
+      }
       fetchAdminData();
     } catch (err: any) { alert(err.message); }
   };

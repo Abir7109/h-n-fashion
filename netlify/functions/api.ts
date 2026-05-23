@@ -7,9 +7,10 @@ import ImageKit from "imagekit";
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://hjvqfvrgwgoffqgdmpob.supabase.co";
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnFmdnJnd2dvZmZxZ2RtcG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDY3ODksImV4cCI6MjA5NDkyMjc4OX0.3NQ5e90FAydaLM_KCtLbbpEX5l4gKxOp4vQpuAd2MHA";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-});
+const hasServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "your_service_role_key";
+const supabaseAdmin = hasServiceRole
+  ? createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
 
 const MAX_IMAGES = Number(process.env.MAX_IMAGES_PER_PRODUCT) || 3;
 
@@ -40,6 +41,7 @@ app.get("/api/debug", (_req, res) => {
 
 // HYBRID UPLOAD: Supabase Storage (primary) → ImageKit (fallback) → base64 (last resort)
 async function ensureStorageBucket() {
+  if (!supabaseAdmin) return;
   const { data: buckets } = await supabaseAdmin.storage.listBuckets();
   if (!buckets?.find(b => b.name === "products")) {
     await supabaseAdmin.storage.createBucket("products", {
@@ -65,7 +67,7 @@ app.post("/api/upload", upload.array("files", MAX_IMAGES), async (req, res) => {
       let uploaded = false;
 
       // TIER 1: Supabase Storage
-      if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "your_service_role_key") {
+      if (supabaseAdmin) {
         try {
           await ensureStorageBucket();
           const { error: uploadErr } = await supabaseAdmin.storage
@@ -137,7 +139,8 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/products", async (req, res) => {
   const images: string[] = req.body.images || [];
-  const { data, error } = await supabaseAdmin.from("products").insert({
+  const db = supabaseAdmin ?? supabase;
+  const { data, error } = await db.from("products").insert({
     title: req.body.title || "Untitled",
     sku: req.body.sku || "N/A",
     qty: Number(req.body.qty) || 0,
@@ -168,13 +171,15 @@ app.put("/api/products/:id", async (req, res) => {
   };
   if (images !== undefined) updateData.images = images.length > 0 ? images : null;
 
-  const { data, error } = await supabaseAdmin.from("products").update(updateData).eq("id", req.params.id).select().single();
+  const db = supabaseAdmin ?? supabase;
+  const { data, error } = await db.from("products").update(updateData).eq("id", req.params.id).select().single();
   if (error) return res.status(error.code === "PGRST116" ? 404 : 500).json({ error: error.message });
   res.json(data);
 });
 
 app.delete("/api/products/:id", async (req, res) => {
-  const { error } = await supabaseAdmin.from("products").delete().eq("id", req.params.id);
+  const db = supabaseAdmin ?? supabase;
+  const { error } = await db.from("products").delete().eq("id", req.params.id);
   if (error) {
     console.error("Delete error:", error);
     return res.status(500).json({ error: error.message });

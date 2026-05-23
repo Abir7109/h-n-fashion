@@ -18,9 +18,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-});
+const hasServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "your_service_role_key";
+const supabaseAdmin = hasServiceRole
+  ? createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
 
 const MAX_IMAGES = Number(process.env.MAX_IMAGES_PER_PRODUCT) || 3;
 
@@ -52,6 +53,7 @@ async function startServer() {
 
   // HYBRID UPLOAD: Supabase Storage (primary) → ImageKit (fallback) → base64 (last resort)
   async function ensureStorageBucket() {
+    if (!supabaseAdmin) return;
     const { data: buckets } = await supabaseAdmin.storage.listBuckets();
     if (!buckets?.find(b => b.name === "products")) {
       await supabaseAdmin.storage.createBucket("products", {
@@ -77,7 +79,7 @@ async function startServer() {
         let uploaded = false;
 
         // TIER 1: Supabase Storage
-        if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "your_service_role_key") {
+        if (supabaseAdmin) {
           try {
             await ensureStorageBucket();
             const { error: uploadErr } = await supabaseAdmin.storage
@@ -147,7 +149,8 @@ async function startServer() {
 
   app.post("/api/products", async (req, res) => {
     const images: string[] = req.body.images || [];
-    const { data, error } = await supabaseAdmin
+    const db = supabaseAdmin ?? supabase;
+    const { data, error } = await db
       .from("products")
       .insert({
         title: req.body.title || "Untitled Product",
@@ -170,6 +173,7 @@ async function startServer() {
 
   app.put("/api/products/:id", async (req, res) => {
     const images: string[] | undefined = req.body.images;
+    const db = supabaseAdmin ?? supabase;
     const updateData: any = {
       title: req.body.title,
       sku: req.body.sku,
@@ -184,7 +188,7 @@ async function startServer() {
     };
     if (images !== undefined) updateData.images = images.length > 0 ? images : null;
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await db
       .from("products")
       .update(updateData)
       .eq("id", req.params.id)
@@ -198,7 +202,8 @@ async function startServer() {
   });
 
   app.delete("/api/products/:id", async (req, res) => {
-    const { error } = await supabaseAdmin
+    const db = supabaseAdmin ?? supabase;
+    const { error } = await db
       .from("products")
       .delete()
       .eq("id", req.params.id);
