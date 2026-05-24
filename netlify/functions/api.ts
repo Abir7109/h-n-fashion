@@ -3,6 +3,7 @@ import serverless from "serverless-http";
 import { createClient } from "@supabase/supabase-js";
 import multer from "multer";
 import ImageKit from "imagekit";
+import nodemailer from "nodemailer";
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://hjvqfvrgwgoffqgdmpob.supabase.co";
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqdnFmdnJnd2dvZmZxZ2RtcG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDY3ODksImV4cCI6MjA5NDkyMjc4OX0.3NQ5e90FAydaLM_KCtLbbpEX5l4gKxOp4vQpuAd2MHA";
@@ -13,6 +14,54 @@ const supabaseAdmin = hasServiceRole
   : null;
 
 const MAX_IMAGES = Number(process.env.MAX_IMAGES_PER_PRODUCT) || 3;
+
+// Email notification setup
+const smtpTransport = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+async function sendInquiryNotification(inquiry: {
+  fullName: string;
+  email: string;
+  company: string;
+  categories: string[];
+  message: string;
+  productTitle?: string;
+  productSku?: string;
+}) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  const productInfo = inquiry.productTitle
+    ? `\nProduct: ${inquiry.productTitle}${inquiry.productSku ? ` (SKU: ${inquiry.productSku})` : ""}`
+    : "";
+  const html = `
+    <h2>New Inquiry Received</h2>
+    <table style="border-collapse:collapse;width:100%;max-width:600px">
+      <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Name</td><td style="padding:8px;border:1px solid #ddd">${inquiry.fullName}</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Email</td><td style="padding:8px;border:1px solid #ddd">${inquiry.email}</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Company</td><td style="padding:8px;border:1px solid #ddd">${inquiry.company}</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Categories</td><td style="padding:8px;border:1px solid #ddd">${inquiry.categories.join(", ") || "N/A"}</td></tr>
+      ${inquiry.productTitle ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Product</td><td style="padding:8px;border:1px solid #ddd">${inquiry.productTitle}${inquiry.productSku ? ` (SKU: ${inquiry.productSku})` : ""}</td></tr>` : ""}
+      <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Message</td><td style="padding:8px;border:1px solid #ddd">${inquiry.message}</td></tr>
+    </table>
+  `;
+  try {
+    await smtpTransport.sendMail({
+      from: `"H&N Fashion BD" <${process.env.SMTP_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL || "humayun@handnfashionbd.com",
+      subject: `New Inquiry from ${inquiry.fullName} - ${inquiry.company}`,
+      text: `New inquiry from ${inquiry.fullName} (${inquiry.email}, ${inquiry.company})${productInfo}\n\nMessage: ${inquiry.message}`,
+      html,
+    });
+  } catch (err) {
+    console.error("Failed to send email notification:", err);
+  }
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -232,7 +281,7 @@ app.get("/api/inquiries", async (_req, res) => {
 });
 
 app.post("/api/inquiries", async (req, res) => {
-  const { error } = await supabase.from("inquiries").insert({
+  const inquiry = {
     full_name: req.body.fullName || "Anonymous",
     email: req.body.email || "N/A",
     company: req.body.company || "N/A",
@@ -240,7 +289,8 @@ app.post("/api/inquiries", async (req, res) => {
     message: req.body.message || "No message",
     product_title: req.body.productTitle,
     product_sku: req.body.productSku,
-  });
+  };
+  const { error } = await supabase.from("inquiries").insert(inquiry);
   if (error) {
     if (error.message?.includes("relation") || error.code === "42P01") {
       return res.status(500).json({
@@ -250,6 +300,16 @@ app.post("/api/inquiries", async (req, res) => {
     }
     return res.status(500).json({ error: error.message });
   }
+  // Send email notification (async, doesn't block response)
+  sendInquiryNotification({
+    fullName: inquiry.full_name,
+    email: inquiry.email,
+    company: inquiry.company,
+    categories: inquiry.categories,
+    message: inquiry.message,
+    productTitle: inquiry.product_title,
+    productSku: inquiry.product_sku,
+  });
   res.status(201).json({ success: true });
 });
 
